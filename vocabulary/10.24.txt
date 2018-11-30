@@ -1,0 +1,22 @@
+We will take advantage of the logarithmic(对数) nature of the binary tree to represent our heap.
+
+In order to guarantee(保证) logarithmic performance(性能)
+
+A balanced binary tree has roughly(大致）the same number of nodes in the left and right subtrees of the root.
+
+The bad news about appending is that we will very likely violate(违反) the heap structure property.
+
+swap(交换)
+
+Quirky(古怪的） or witty（诙谐，富有机智） sense of humor
+
+Exceptional at mathematics or spatial reasoning(空间推理).
+
+regain(恢复)
+
+Figure2(插图）shows the series of swaps needed to percolate(扩散) the newly added item up to its proper position in the tree.
+
+We are also preserving the heap property for any siblings(兄弟姐妹）.
+
+Since the heap property requires(要求) that the root of the tree be the smallest item in the tree.
+

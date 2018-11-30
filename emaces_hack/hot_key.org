@@ -1,0 +1,92 @@
+* spacemacs hot keys
+** other
+   有道词典 spc o i/y
+   插入代码块 <s tab 输入语言
+   打开 major mode 输入代码  spc m ,
+   配置文件 spc f e d
+   '' 快速切换buffer
+   spc q r重启配置
+   spc h d v 查看 配置模块 详情
+** file
+   d ;;加上待删除标记
+   u ;;取消待删除标记,其实也可取消其他标记
+   x ;;删除标记的所有文件
+   ~;;给所有备份文件加上待删除标记
+   D ;;大D立即删除指定文件
+   C ;;大C用于复制该文件到一个目录中
+   2 C;;复制该光标以及后面一个文件
+   R ;;重命名文件，也可用于移动文件
+   Z ;;(dired-do-compress)压缩与解压缩
+   = ;;比较改文件与另一个待会输入的文件，类同于UNIX中的diff命令
+   + ;;创建新文件夹
+** agenda
+   SPC t L     => enables line wrapping
+   SPC f f     => opens file
+   SPC t n     => shows line number
+   SPC a o o   => shows org mode or spc m a
+   SPC b       => shows action for buffer
+   SPC b d     => kills current buffer
+   SPC m d     => set deadline for the current TODO
+   SPC m s     => set schedule for the current TODO
+   SPC TAB     => cycle between open buffers
+   SPC m RET   => insert headline (inherit from above)
+   C-c C-t     => toggle status for TODO
+   C-c [       => add this buffer to agenda list 加入后agenda to do中才会显示
+   C-c ]       => remove this file from agenda list
+   SPC m A     => archive a TODO item
+   SPC m R     => refile an archived item
+   SPC SPC     => M-xagenda
+   SPC m p     => org-pomodoro
+   SPC m q     => org-pomodoro cancel
+** org_agenda readme
+| ~m-spc~ or ~s-m-spc~ | org-agenda transient state        |
+| ~spc m :~            | org-agenda-set-tags               |
+| ~spc m a~            | org-agenda                        |
+| ~spc m d~            | org-agenda-deadline               |
+| ~spc m f~            | org-agenda-set-effort             |
+| ~spc m i~            | org-agenda-clock-in               |
+| ~spc m o~            | org-agenda-clock-out              |
+| ~spc m p~            | org-pomodoro (if package is used) |
+| ~spc m p~            | org-agenda-set-property           |
+| ~spc m q~            | org-agenda-refile                 |
+| ~spc m q~            | org-agenda-clock-cancel           |
+| ~spc m s~            | org-agenda-schedule               |
+| ~m-j~                | next item                         |
+| ~m-k~                | previous item                     |
+| ~m-h~                | earlier view                      |
+| ~m-l~                | later view                        |
+| ~gr~                 | refresh                           |
+| ~gd~                 | toggle grid                       |
+| ~C-v~                | change view                       |
+| ~RET~                | org-agenda-goto                   |
+| ~M-RET~              | org-agenda-show-and-scroll-up     |
+** org-mode edit
+ctrl-c ctrl-e org-mode导出文件
+Ctrl-c ctrl-l 描述链接地址
+*** 基于大纲标题快捷键
+M-RET 插入同级别标题
+M-S-RET 插入同级别todo标题
+M-LEFT/Right 标题升降级
+M-S-LEFT/Right 子树升降级
+M-S-UP/Down 子树升降级
+C-c * 将本行设为标题或正文
+C-c C-w 将子树或者区域移动到另一个标题处(跨缓冲区)
+C-c C-x b 在新缓冲区显示当前分支
+C-c / 只列出包含搜索结果的大纲，并高亮，支持多种搜索方式
+*** 文学编程
+spc-m-' 进入编辑模式 C-c C-p 启动命令行 C-c C-c运行
+** quick comment
+you can use g-c-c to comment one line and you can use v select code block use
+gc to comment these
+* spacemacs hack debug
+** org-mode python add fill-column
+solut python fill-column 78 don't work well
+https://github.com/syl20bnr/spacemacs/issues/9698
+** path warning about bashrc or zshrc questions
+    solution
+    put this (setq exec-path-from-shell-arguments '("-l")) in your dotspacemacs/user-init
+* vim hot keys
+ci'、ci"、ci(、ci[、ci{、ci< - 分别更改这些配对标点符号中的文本内容
+di'、di"、di(或dib、di[、di{或diB、di< - 分别删除这些配对标点符号中的文本内容
+yi'、yi"、yi(、yi[、yi{、yi< - 分别复制这些配对标点符号中的文本内容
+vi'、vi"、vi(、vi[、vi{、vi< - 分别选中这些配对标点符号中的文本内容

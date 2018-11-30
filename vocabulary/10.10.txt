@@ -1,0 +1,15 @@
+ordered collection 有序集合
+the removal of 删除
+significant 重要的
+principle 原则，原理
+implementing 实施，实践 implementing a stack in python
+make sense 说的通
+utilize 利用
+primitive 原生的 原始的
+It make sense to utilize the power and simplicity of the primitive collections provided by Python.
+mechanism 机械装置
+parentheses 括号
+notorious 臭名昭著
+Lisp is notorious for using lots and lots of parentheses.
+correspond 对应的相应的
+differentiate 区分

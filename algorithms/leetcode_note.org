@@ -1,0 +1,1051 @@
+* leetcode_note
+** Linked Lists
+*** Add Two Numbers
+You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
+
+You may assume the two numbers do not contain any leading zero, except the number 0 itself.
+
+Example:
+
+Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+Output: 7 -> 0 -> 8
+Explanation: 342 + 465 = 807.
+
+first AC
+#+BEGIN_SRC python
+  # Definition for singly-linked list.
+  # class ListNode:
+  #     def __init__(self, x):
+  #         self.val = x
+  #         self.next = None
+
+  class Solution:
+      def addTwoNumbers(self, l1, l2):
+          """
+          :type l1: ListNode
+          :type l2: ListNode
+          :rtype: ListNode
+          """
+          a = 0
+          b = 0
+          sum1 = 0
+          sum2 = 0
+          while True:
+              if l1 is not None:
+                  num = l1.val
+                  l1 = l1.next
+                  sum1 += num*10**a
+                  a += 1
+              elif l2 is not None:
+                  num = l2.val
+                  l2 = l2.next
+                  sum2 += num*10**b
+                  b += 1
+              else:
+                  break
+          sum = sum1 + sum2
+          print(sum)
+          head = ListNode(0)
+          pre = head
+          que = None
+          while sum != 0:
+              num = sum % 10
+              print(num)
+              sum = sum // 10
+              #print(sum)
+              pre.val = num
+              if sum != 0:
+                  pre.next = ListNode(0)
+                  pre = pre.next
+          return head
+#+END_SRC
+
+九章算法答案
+#+BEGIN_SRC python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def addTwoNumbers(self, l1, l2):
+        """
+        :type l1: ListNode
+        :type l2: ListNode
+        :rtype: ListNode
+        """
+        head = ListNode(0)
+        ptr = head
+        carry  = 0
+        while True:
+            if l1 != None:
+                carry += l1.val
+                l1 = l1.next
+                #print carry
+            if l2 != None:
+                carry += l2.val
+                l2 = l2.next
+            print carry
+            ptr.val = carry % 10
+            carry /= 10
+            # 运算未结束新建一个节点用于储存答案，否则退出循环
+            if l1 != None or l2 != None or carry != 0:
+                ptr.next = ListNode(0)
+                ptr = ptr.next
+            else: 
+                break
+        return head
+
+#+END_SRC
+*** Reverse Linked List 
+Reverse a singly linked list.
+
+Example:
+
+Input: 1->2->3->4->5->NULL
+Output: 5->4->3->2->1->NULL
+Follow up:
+
+A linked list can be reversed either iteratively or recursively. Could you
+implement both?
+
+iteratively
+#+BEGIN_SRC python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reverseList(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        pre = None
+        while head:
+            temp = head.next
+            head.next = pre
+            pre = head
+            head = temp
+        return pre
+#+END_SRC
+*** Merge Two Sorted Lists
+Merge two sorted linked lists and return it as a new list. The new list should be made by splicing together the nodes of the first two lists.
+
+Example:
+
+Input: 1->2->4, 1->3->4
+Output: 1->1->2->3->4->4
+
+#+BEGIN_SRC python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def mergeTwoLists(self, l1, l2):
+        """
+        :type l1: ListNode
+        :type l2: ListNode
+        :rtype: ListNode
+        """
+        mark = ListNode(0)
+        head = mark
+        while l1 is not None and l2 is not None:
+            if l1.val < l2.val:
+                mark.next = l1
+                l1 = l1.next
+            else:
+                mark.next = l2
+                l2 = l2.next
+            mark = mark.next
+        if l1 != None:
+            mark.next = l1
+        else:
+            mark.next = l2
+            
+        return head.next
+
+#+END_SRC
+*** Palindrome Linked List
+Given a singly linked list, determine if it is a palindrome.
+
+Example 1:
+
+Input: 1->2
+Output: false
+Example 2:
+
+Input: 1->2->2->1
+Output: true
+Follow up:
+Could you do it in O(n) time and O(1) space?
+
+#+BEGIN_SRC python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def isPalindrome(self, head):
+        """
+        :type head: ListNode
+        :rtype: bool
+        """
+        #split
+        fast = last  = head
+        while fast and fast.next:
+            fast = fast.next.next
+            last = last.next
+            
+        #reserver
+        pre = None
+        while last:
+            mark = last.next
+            last.next = pre
+            pre = last
+            last = mark
+            
+        #compire
+        while last and head:
+            if last.next != head.next:
+                return False
+            last = last.next
+            head = head.next
+        return True
+
+#+END_SRC
+*** Intersection of Two Linked Lists
+Write a program to find the node at which the intersection of two singly linked lists begins.
+
+
+For example, the following two linked lists:
+
+A:          a1 → a2
+                   ↘
+                     c1 → c2 → c3
+                   ↗            
+B:     b1 → b2 → b3
+begin to intersect at node c1.
+
+
+Notes:
+
+If the two linked lists have no intersection at all, return null.
+The linked lists must retain their original structure after the function returns.
+You may assume there are no cycles anywhere in the entire linked structure.
+Your code should preferably run in O(n) time and use only O(1) memory.
+#+BEGIN_SRC python 
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def getIntersectionNode(self, headA, headB):
+        """
+        :type head1, head1: ListNode
+        :rtype: ListNode
+        """
+        # intersection = set()
+        # while headA:
+        #     intersection.add(headA)
+        #     headA = headA.next
+        # while headB:
+        #     if headB in intersection:
+        #         return headB
+        #     headB = headB.next
+        def length(L):
+            length = 0
+            while L:
+                length += 1
+                L = L.next
+            return length
+        
+        len_a, len_b = length(headA), length(headB)
+        if len_a > len_b:
+            headA, headB = headB, headA
+            
+        for _ in range(abs(len_a - len_b)):
+            headB = headB.next
+            
+        while headA and headB and headA != headB:
+            headA, headB = headA.next, headB.next
+        return headA
+
+#+END_SRC
+** String
+*** Longest Substring Without Repeation Characters
+Given a string, find the length of the longest substring without repeating characters.
+
+Example 1:
+
+Input: "abcabcbb"
+Output: 3 
+Explanation: The answer is "abc", with the length of 3. 
+Example 2:
+
+Input: "bbbbb"
+Output: 1
+Explanation: The answer is "b", with the length of 1.
+Example 3:
+
+Input: "pwwkew"
+Output: 3
+Explanation: The answer is "wke", with the length of 3. 
+             Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
+
+#+BEGIN_SRC python
+class Solution:
+    def lengthOfLongestSubstring(self, s):
+        """
+        :type s: str
+        :rtype: int
+        """
+        count = len(s)
+        uni_num = set()
+        j = 0
+        longest = 0
+        for i in range(count):
+            while j < count and s[j] not in uni_num:
+                uni_num.add(s[j])
+                #rint("set_num is {}".format(uni_num))
+                j = j + 1
+            longest = max(longest, j - i)
+            #rint("longest is {}".format(longest))
+            uni_num.remove(s[i])
+            #rint("dis {}".format(uni_num))
+            #ni_num = set()
+            # = i
+        return longest
+                
+#+END_SRC
+*** Find All Anagrams in a String
+Given a string s and a non-empty string p, find all the start indices of p's anagrams in s.
+
+Strings consists of lowercase English letters only and the length of both strings s and p will not be larger than 20,100.
+
+The order of output does not matter.
+
+Example 1:
+
+Input:
+s: "cbaebabacd" p: "abc"
+
+Output:
+[0, 6]
+
+Explanation:
+The substring with start index = 0 is "cba", which is an anagram of "abc".
+The substring with start index = 6 is "bac", which is an anagram of "abc".
+Example 2:
+
+Input:
+s: "abab" p: "ab"
+
+Output:
+[0, 1, 2]
+
+Explanation:
+The substring with start index = 0 is "ab", which is an anagram of "ab".
+The substring with start index = 1 is "ba", which is an anagram of "ab".
+The substring with start index = 2 is "ab", which is an anagram of "ab".
+
+#+BEGIN_SRC python 
+class Solution:
+    def findAnagrams(self, s, p):
+        """
+        :type s: str
+        :type p: str
+        :rtype: List[int]
+        """
+        result = []
+        arry_p = [0] * 26
+        for i in p:
+            arry_p[ord(i) - 97] += 1
+        arry_s = [0] * 26
+        length = len(p)
+        for j, m in enumerate(s):
+            arry_s[ord(s[j]) - 97] += 1
+            
+            if j >= length:  #达到p的长度后将前一个字符的计数删除
+                arry_s[ord(s[j-length])-97] -= 1
+            
+            if arry_s == arry_p:
+                result.append(j - length + 1)
+        return result
+                
+#+END_SRC
+** binary Tree
+*** Merge Two Binary Trees
+Given two binary trees and imagine that when you put one of them to cover the
+ other, some nodes of the two trees are overlapped while the others are not.
+
+You need to merge them into a new binary tree. The merge rule is that if two
+ nodes overlap, then sum node values up as the new value of the merged node.
+ Otherwise, the NOT null node will be used as the node of new tree.
+
+Example 1:
+
+Input: 
+	Tree 1                     Tree 2                  
+          1                         2                             
+         / \                       / \                            
+        3   2                     1   3                        
+       /                           \   \                      
+      5                             4   7                  
+Output: 
+Merged tree:
+	     3
+	    / \
+	   4   5
+	  / \   \ 
+	 5   4   7
+ 
+
+Note: The merging process must start from the root nodes of both trees.
+
+
+#+BEGIN_SRC python 
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def mergeTrees(self, t1, t2):
+        """
+        :type t1: TreeNode
+        :type t2: TreeNode
+        :rtype: TreeNode
+        """
+        if t1 and t2:
+            t1.val += t2.val
+            t1.left = self.mergeTrees(t1.left, t2.left)
+            t1.right = self.mergeTrees(t1.right, t2.right)
+            return t1
+        if t1:
+            return t1
+        if t2:
+            return t2
+        
+
+#+END_SRC
+*** Maximum Depth of Binary Tree
+Given a binary tree, find its maximum depth.
+
+The maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
+
+Note: A leaf is a node with no children.
+
+Example:
+
+Given binary tree [3,9,20,null,null,15,7],
+
+    3
+   / \
+  9  20
+    /  \
+   15   7
+return its depth = 3.
+#+BEGIN_SRC python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxDepth(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        if not root:
+            return 0
+        return max(self.maxDepth(root.left), self.maxDepth(root.right)) + 1
+#+END_SRC
+*** Invert Binary Tree 
+Invert a binary tree.
+
+Example:
+
+Input:
+
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+Output:
+
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+Trivia:
+This problem was inspired by this original tweet by Max Howell:
+
+Google: 90% of our engineers use the software you wrote (Homebrew), but you 
+can’t invert a binary tree on a whiteboard so f*** off.
+
+#+BEGIN_SRC python 
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def invertTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: TreeNode
+        """
+        if root is None:
+            return None
+        right = self.invertTree(root.right)
+        left = self.invertTree(root.left)
+        root.right = left
+        root.left = right
+        return root
+#+END_SRC
+*** Binary Tree Inorder Traversal (import)
+Given a binary tree, return the inorder traversal of its nodes' values.
+
+Example:
+
+Input: [1,null,2,3]
+   1
+    \
+     2
+    /
+   3
+
+Output: [1,3,2]
+Follow up: Recursive solution is trivial, could you do it iteratively
+
+Recursive version
+#+BEGIN_SRC python 
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderTraversal(self, root):
+        """
+        :type root: TreeNode
+        :rtype: List[int]
+        """
+        if root is None:
+            return []
+        return self.inorderTraversal(root.left) + \
+    [root.val] + self.inorderTraversal(root.right)
+
+
+#+END_SRC
+
+Iteratively version
+#+BEGIN_SRC python
+
+#+END_SRC
+*** Convert BST to Greater Tree 
+Given a Binary Search Tree (BST), convert it to a Greater Tree such that every key of the original BST is changed to the original key plus sum of all keys greater than the original key in BST.
+
+Example:
+
+Input: The root of a Binary Search Tree like this:
+              5
+            /   \
+           2     13
+
+Output: The root of a Greater Tree like this:
+             18
+            /   \
+          20     13
+#+BEGIN_SRC python 
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def convertBST(self, root):
+        """
+        :type root: TreeNode
+        :rtype: TreeNode
+        """
+        self.sum = 0
+        self.helper(root)
+        return root
+    def helper(self, root):
+        if root is None:
+            return 
+        
+        if root.right:
+            self.helper(root.right)
+        self.sum += root.val
+        root.val = self.sum
+        if root.left:
+            self.helper(root.left)
+#+END_SRC
+二叉搜索树
+*** Same Tree 
+Given two binary trees, write a function to check if they are the same or not.
+
+Two binary trees are considered the same if they are structurally identical and the nodes have the same value.
+
+Example 1:
+
+Input:     1         1
+          / \       / \
+         2   3     2   3
+
+        [1,2,3],   [1,2,3]
+
+Output: true
+Example 2:
+
+Input:     1         1
+          /           \
+         2             2
+
+        [1,2],     [1,null,2]
+
+Output: false
+Example 3:
+
+Input:     1         1
+          / \       / \
+         2   1     1   2
+
+        [1,2,1],   [1,1,2]
+
+Output: false
+
+Recursive:
+#+BEGIN_SRC python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSameTree(self, p, q):
+        """
+        :type p: TreeNode
+        :type q: TreeNode
+        :rtype: bool
+        """
+        if q is None and p is None:
+            return True
+        elif q is None or p is None:
+            return False
+        elif q.val != p.val:
+            return False
+        else:
+            left_tree = self.isSameTree(p.left, q.left)
+#+END_SRC
+
+iterative 
+#+BEGIN_SRC python
+  # DFS + stack
+  class Solution(object):
+      def isSameTree(self, p, q):
+          stack = [(q, p)]
+          while stack:
+              n1, n2 = stack.pop()
+            
+              if n1 and n2:
+                  if n1.val != n2.val:
+                      return False
+                  stack += [(n1.right, n2.right), (n1.left, n2.left)]
+              elif n1 or n2:
+                  return False
+              else:
+                  continue
+            
+          return True
+
+  # BFS + queue
+  class SolutionBFS(object):
+      def isSameTree(self, p, q):
+          queue = [(p, q)]
+          while queue:
+              n1, n2 = queue.pop(0)
+            
+              if n1 and n2:
+                  if n1.val != n2.val:
+                      return False
+                  # put 2 lefts, 2 rights, order doesn't matter
+                  queue += [(n1.left, n2.left), (n1.right, n2.right)]
+              elif n1 or n2:
+                  return False
+              else:
+                  continue
+            
+          return True
+
+# deque
+  class Solution(object):
+      def isSameTree(self, p, q):
+          queue = collections.deque([p,q])
+          while queue:
+              u1 = queue.popleft()
+              u2 = queue.popleft()
+              if u1 is None and u2 is None:
+                  return False
+              elif u1 is None or u2 is None:
+                  return False
+              elif: u1.val != u2.val:
+                  return False
+              else:
+                  queue.append(u1.left)
+                  queue.append(u2.left)
+                  queue.append(u1.right)
+                  queue.append(u2.right)
+          return True
+
+#+END_SRC
+*** Symmetric Tree 
+Given a binary tree, check whether it is a mirror of itself (ie, symmetric around its center).
+
+For example, this binary tree [1,2,2,3,4,4,3] is symmetric:
+
+    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+But the following [1,2,2,null,3,null,3] is not:
+    1
+   / \
+  2   2
+   \   \
+   3    3
+Note:
+Bonus points if you could solve it both recursively and iteratively.
+
+
+Recursively
+#+BEGIN_SRC python 
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSymmetric(self, root):
+        """
+        :type root: TreeNode
+        :rtype: bool
+        """
+        if not root:
+            return True
+        return self.isMirror(root, root)
+        
+    def isMirror(self, left, right):
+        if left is None and right is None:
+            return True
+        elif left is None or right is None:
+            return False
+        elif left.val != right.val:
+            return False
+        else:
+            return self.isMirror(left.left, right.right) and self.isMirror(right.left, left.right)
+
+#+END_SRC
+*** Diameter of Binary Tree
+Given a binary tree, you need to compute the length of the diameter of the tree. The diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.
+
+Example:
+Given a binary tree 
+          1
+         / \
+        2   3
+       / \     
+      4   5    
+Return 3, which is the length of the path [4,2,1,3] or [5,2,1,3].
+
+Note: The length of path between two nodes is represented by the number of
+edges between them.
+
+#+BEGIN_SRC python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def diameterOfBinaryTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        self.d = 0
+        def dfs(node):
+            if not node: return 0
+            l, r = dfs(node.left), dfs(node.right)
+            self.d = max(l + r, self.d)
+            return 1 + max(l, r)
+        dfs(root)
+        return self.d
+
+#+END_SRC
+** Palindromic string 
+*** Palindromic Substrings
+Given a string, your task is to count how many palindromic substrings in this string.
+
+The substrings with different start indexes or end indexes are counted as different substrings even they consist of same characters.
+
+Example 1:
+Input: "abc"
+Output: 3
+Explanation: Three palindromic strings: "a", "b", "c".
+Example 2:
+Input: "aaa"
+Output: 6
+Explanation: Six palindromic strings: "a", "a", "a", "aa", "aa", "aaa".
+Note:
+The input string length won't exceed 1000.
+#+BEGIN_SRC python 
+class Solution:
+    def countSubstrings(self, s):
+        """
+        :type s: str
+        :rtype: int
+        """
+        count = len(s)
+        center = 2*count - 1
+        ans = 0
+        for cen in range(center):
+            left = cen // 2
+            right = left + cen % 2
+            while left >= 0 and right < count and s[left] == s[right]:
+                ans += 1
+                left -= 1
+                right += 1
+        return ans
+
+#+END_SRC
+解题思路：
+回文词的中心有两种情况
+“abc” 中心为b
+“aa” 中心是两个字母中间
+str长度为n 就有 2n-1个位置可能是回文词的中心
+
+我们遍历所有回文词可能的中心 向左右扩展然后判断是否是回文词 然后计数
+当中心是字母时 left=right = cen//2 cen 是偶数
+当中心是空隙时 left= cen // 2 right = left + 1  cen是奇数。
+** Sort
+*** Move Zeroes
+Given an array nums, write a function to move all 0's to the end of it while maintaining the relative order of the non-zero elements.
+
+Example:
+
+Input: [0,1,0,3,12]
+Output: [1,3,12,0,0]
+Note:
+
+You must do this in-place without making a copy of the array.
+Minimize the total number of operations.
+
+#+BEGIN_SRC python
+class Solution:
+    def moveZeroes(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: void Do not return anything, modify nums in-place instead.
+        """
+        left, right = 0, 0
+        while right < len(nums):
+            if nums[right] != 0:
+                nums[left], nums[right] = nums[right], nums[left]
+                left += 1
+            right += 1
+#+END_SRC
+不用先排序 使用双指针
+*** Queue Reconstruction by Height
+Suppose you have a random list of people standing in a queue. Each person is described by a pair of integers (h, k), where h is the height of the person and k is the number of people in front of this person who have a height greater than or equal to h. Write an algorithm to reconstruct the queue.
+
+Note:
+The number of people is less than 1,100.
+
+
+Example
+
+Input:
+[[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]
+
+Output:
+[[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]]
+
+
+#+BEGIN_SRC python
+class Solution:
+    def reconstructQueue(self, people):
+        """
+        :type people: List[List[int]]
+        :rtype: List[List[int]]
+        """
+        if not people:
+            return []
+        s = sorted(people, key = lambda people: [-people[0], people[1]])
+        print(s)
+        l = []
+        # for h,i in s:
+        #     #print(l)
+        #     l.insert(i,[h,i])
+            
+        i = 0
+        while i < len(s):
+            l.insert(s[i][1],s[i])
+            i+=1
+        return l
+
+#+END_SRC
+结题的关键是 把二维列表第一个元素和第二个元素相反的排序 用lambad people:
+[-people[0],people[1]]) 巧妙解决。
+注释用的for循环代码简介但是没有while循环速度快。
+** Array
+*** Find All Numbers Disappeared in an Array
+Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some
+elements  appear twice and others appear once.
+
+Find all the elements of [1, n] inclusive that do not appear in this array.
+
+Could you do it without extra space and in O(n) runtime? You may assume the 
+returned list does not count as extra space.
+
+Example:
+
+Input:
+[4,3,2,7,8,2,3,1]
+
+Output:
+[5,6]
+
+解法1
+#+BEGIN_SRC python 
+class Solution:
+    def findDisappearedNumbers(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        """
+        for i in nums:
+            j = abs(i) - 1
+            if nums[j] >= 0:
+                nums[j] = -nums[j]
+        return [i+1 for i, num in enumerate(nums) if num > 0]
+#+END_SRC
+解题思路：
+一个有n个数 列表中最大的数是n
+所以可以用n-1来当做索引，把当前索引上的数设为负值筛选出去。
+因为索引是不连续的必然有数值会留下来。而留下来的数值的索引+1 就是缺失的值。
+
+解法2
+#+BEGIN_SRC python 
+class Solution:
+    def findDisappearedNumbers(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        """
+        s = set(nums)
+        count = len(nums)
+        s2 = set(range(1,count+1))
+        n = list(s2-s)
+        return n
+
+#+END_SRC
+利用set操作对于python来说感觉有点作弊。
+** Stack
+*** Min Stack
+Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+
+push(x) -- Push element x onto stack.
+pop() -- Removes the element on top of the stack.
+top() -- Get the top element.
+getMin() -- Retrieve the minimum element in the stack.
+Example:
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin();   --> Returns -3.
+minStack.pop();
+minStack.top();      --> Returns 0.
+minStack.getMin();   --> Returns -2.
+#+BEGIN_SRC python
+class MinStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.stack = []
+
+    def push(self, x):
+        """
+        :type x: int
+        :rtype: void
+        """
+        curMin = self.getMin()
+        if curMin is None or x < curMin:
+            curMin = x
+        self.stack.append((x,curMin))
+        
+
+    def pop(self):
+        """
+        :rtype: void
+        """
+        if self.stack == []:
+            return None
+        else:
+            self.stack.pop()
+        
+
+    def top(self):
+        """
+        :rtype: int
+        """
+        if self.stack == []:
+            return None
+        else:
+            return self.stack[-1][0]
+        
+
+    def getMin(self):
+        """
+        :rtype: int
+        """
+        if self.stack == []:
+            return None
+        else:
+            return self.stack[-1][1]
+#+END_SRC

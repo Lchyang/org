@@ -1,0 +1,17 @@
+comrades 朋友，同志 
+Josephus and 39 of his comrades held out against the Romans in cave
+imminent 迫近
+with defeat imminent 
+slave 奴隶
+they would rather die than be slaves to the Romans
+timestamp 时间戳
+constructor 建造者
+decrements 递减
+internal timer 内部计时器 
+idle 空置
+The tick method decrements the internal timer and sets the printer to idle 
+if the task is completed.
+positioned 位置
+the unrestrictive nature of 不受限制的性质
+likewise 同样的
+in a sense 从某种意义上来说

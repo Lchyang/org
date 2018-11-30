@@ -1,0 +1,4 @@
+Our first example of a tree is a classification（类别） tree from biology.
+
+The first property this example demonstrates(表明) is that tree are hierarchical(分等级的).
+

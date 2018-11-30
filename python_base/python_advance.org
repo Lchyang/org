@@ -1,0 +1,380 @@
+* 数据结构和算法案例进阶训练
+** 如何在列表，字典，集合中根据条件筛选数据？
+列表解析，filter，列表解析的速度是filter的一半左右，字典解析，集合解析
+** 如何为元组中的每个元素命名，提高程序可读性。
+设置常量，替代索引值，元组拆包。 collections中的nametuple
+** 如何统计序列中元素出现频度？
+用字典dict.fromkeys(data,0)创建字典，然后迭代每个key出现value加一
+collections 中 Counter 和 counter.most_common
+** 如何快速找到多个字典中的公共key？
+reduce(lambda a,b: a&b, map(dict.keys(),[data1, data2, data3]))
+** 如何让字典保持有序？
+collections 中 OrderedDict
+** 如何实现用户历史记录功能？
+collections 中 deque
+* 对象迭代与反迭代案例进阶训练
+* TODO 字符串处理案例进阶训练
+** 如何拆分含多种分隔符的字符串
+案例：要把某个字符串依据分隔符拆分成不同的字段
+s = 'ab;cd|efg|hi,jkl|mn\topq;rst,uvw\txyz'
+其中，；\ /t都是分隔符，如何处理
+#+BEGIN_SRC python
+  # split()方法
+  def mySplit(s, ds):
+      res = [s]
+      for d in ds:
+          t = []
+          list(map(lambda x: t.extend(x.split(d)), res))
+          res = t
+      return [x for x in res if x] #当两个分隔符连续时会产生空字符串 过滤掉
+
+  s = 'ab;cd|efg|hi,,jkl|mn\topq;rst,uvw\txyz'
+  print(mySplit(s, ';,|\t'))
+
+  # In [7]: ['ab', 'cd', 'efg', 'hi', 'jkl', 'mn', 'opq', 'rst', 'uvw', 'xyz']
+
+  # 方法二： re 模块 re.split
+  import re
+  print(re.split(r'[,;|\t]+', s))
+#+END_SRC
+** 如何判断字符串a是否以字符串b结尾
+案例：某文件系统目录下有一系列文件：
+quicksort.c
+graph.py
+heap.java
+install.sh
+stack.cpp 
+...
+编写程序给其中的所有.sh文件和.py文件加上用户权限
+
+解决方案：使用字符串的str.startswith()和str.endswith()方法
+#+BEGIN_SRC python
+  In [18]: ls
+  HelloWorld.class  c_test/           test.py           venv2/
+  HelloWorld.java   test              underscores.txt
+
+  In [19]: import os, stat
+
+  In [20]: os.listdir('.')
+  Out[20]:
+  ['.DS_Store',
+   'c_test',
+   'HelloWorld.class',
+   'HelloWorld.java',
+   'test',
+   'test.py',
+   'underscores.txt',
+   'venv2']
+# 注意endswith()参数不能是列表。
+  In [29]: [name for name in os.listdir('.') if name.endswith(('.sh','.py'))]
+  Out[29]: ['test.py']
+
+  In [30]: os.stat('test.py')
+  Out[30]: posix.stat_result(st_mode=33188, st_ino=10893185, st_dev=16777220,
+                             st_nlink=1, st_uid=501, st_gid=20, st_size=0,
+                             st_atime=1542949483, st_mtime=1542949488, st_ctime=1542949488)
+
+  In [31]: os.stat('test.py').st_mode
+  Out[31]: 33188
+
+  In [32]: oct(os.stat('test.py').st_mode)
+  Out[32]: '0100644'
+
+  In [33]: os.chmod('test.py', os.stat('test.py').st_mode | stat.S_IXUSR)
+
+  In [34]: ls -l
+  total 32
+  -rw-r--r--  1 lichunyang  staff  425  9 20 13:56 HelloWorld.class
+  -rw-r--r--  1 lichunyang  staff  147  9 20 13:56 HelloWorld.java
+  drwxr-xr-x  5 lichunyang  staff  170  9 24 22:41 c_test/
+  -rw-r--r--  1 lichunyang  staff   62  3 14  2018 test
+  -rwxr--r--  1 lichunyang  staff    0 11 23 13:04 test.py*
+  -rw-r--r--  1 lichunyang  staff  141  9 29 10:11 underscores.txt
+  drwxr-xr-x  6 lichunyang  staff  204  7 17 16:38 venv2/
+#+END_SRC
+test.py 权限已经改变
+** 如何调整字符串中文本的格式
+将一个log 文件中的 2018-05-23 的日期格式 转换成 05/23/2018的格式
+#+BEGIN_SRC python
+  import re
+  log  = open('var/log/dpkg.log').read()
+
+  '''
+  re.sub?
+  Signature: re.sub(pattern, repl, string, count=0, flags=0)
+  Docstring:
+  Return the string obtained by replacing the leftmost
+  non-overlapping occurrences of the pattern in string by the
+  replacement repl.  repl can be either a string or a callable;
+  if a string, backslash escapes in it are processed.  If it is
+  a callable, it's passed the match object and must return
+  '''
+  re.sub('(\d{4})-(\d{2})-(\d{2}))', r'\2/\3/\1', log) #注意正则表达式中使用原始字符串
+  re.sub('(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}))',
+         r'\g<month>/\g<day>/\g<year>', log)
+  # 第一种使用引用计数方法 第二种属于引用名字方法。
+#+END_SRC
+* 文件I/O高效处理案例训练
+* csv, json, xml, excel 高效解析案例进阶训练
+* 类与对象深度技术案例进阶训练
+** 如何派生内置不可变类型并修改其实例化行为？
+案例：我们想自定义一种新类型的元组，对于传入的可迭代对象，我们只保留其中的int类
+型且值大于0的元素，例如：IntTuple([1,-1,'abc',6,['x','y'],3])=>(1,6,3)
+要求IntTuple是内置tuple的子类，如何实现
+#+BEGIN_SRC python
+  class IntTuple(tuple):
+      def __new__(cls, iterable): #基于__init__中不可改变所以要改变__new__
+          g = (x for x in iterable if isinstance(x, int) and x > 0)
+          return super(IntTuple, cls).__new__(cls, g)
+      def __init__(self, iterable):
+          # before 当self实例传入__init__时 tuple已经创建了在这也不能改变
+          super(IntTuple, self).__init__(iterable)
+          # after self是tuple的实例 tuple是不可变对象 在这改变是不可能的
+
+  t = IntTuple([1, -1, 'abc', 6, ['x', 'y'],3])
+  print t
+#+END_SRC
+** 如何为创建大量的实例节省内存？
+实际案例：
+某网络游戏中，定义了玩家类Player（id，name, status,..)每有一个在线的玩家，在服
+务器程序内则有一个Player的实例，当在线人数很多时，将产生大量的实例。（如百万级）
+如何降低这些大量的内存开销？
+解决方案： 定义类的__slots__属性，它是用来声明实例属性名字的列表。
+#+BEGIN_SRC python
+
+  class Player():
+      def __init__(self, uid, name, status=0, level=1):
+          self.uid = uid
+          self.name = name
+          self.stat = status
+          self.level = level
+
+  class Player2():
+      __slots__ = ['uid', 'name', 'stat', 'level']
+      def __init__(self, uid, name, status=0, level=1):
+          self.uid = uid
+          self.name = name
+          self.stat = status
+          self.level = level
+
+  p1 = Player('0001', 'Jim')
+  p2 = Player2('0001', 'Jim')
+  print(set(dir(p1)) - set(dir(p2)))
+  # 输出
+  # In [2]: {'__weakref__', '__dict__'}
+  import sys
+  print(sys.getsizeof(p1.__dict__))
+  print(sys.getsizeof(p2.__slots__))
+  # 112
+  # 96
+#+END_SRC
+为了节省内存通过定义__slots__方法禁止__dict__动态绑定。
+** 如何让对象支持上下文管理？
+实现上下文管理协议需要定义实例的__enter__,__exit__方法。他们分别在with开始和结
+束时被调用。
+** 如何创建可管理的对象属性？
+#+BEGIN_SRC python
+  from math import pi
+  class Circle:
+      def __init__(self, radius):
+          self.radius = radius # 直接利用类属性访问的话 不能确保是数字不能进行操作。
+
+      def getRadius(self):
+          return self.radius
+
+      def setRadius(self, value):
+          if not isinstance(value, (int, float)):
+              raise ValueError('wrong type.')
+          self.radius = float(value)
+
+      def getArea(self):
+          return self.radius **2 * pi
+
+      R = property(getRadius, setRadius) # 可以传三个值创建访问和删除
+
+  c = Circle(3.2)
+  print(c.R)
+  c.R = ''
+  print(c.R)
+#+END_SRC
+利用property 可以实现c.R的访问属性 访问安全设计灵活。
+** 如何让类支持比较操作？
+#+BEGIN_SRC python
+  from functools import total_ordering
+  from abc import abstractmethod
+
+  @total_ordering
+  class Shape:
+      @abstractmethod #实现一个抽象接口子类都需要实现这个接口
+      def area(self):
+          pass
+
+      def __lt__(self, obj): # 通过 __lt__和 __eq__ 和其他的逻辑组合实现全部的大小比较。
+          print('in __lt__') # 通过 @total_ordering 装饰器实现
+          if not isinstance(obj, Shape):
+              raise TypeError('obje is not Shape')
+          return self.area() < obj.area()
+
+      def __eq__(self, obj):
+          print ('in __eq__')
+          if not isinstance(obj, Shape):
+              raise TypeError('obj is not Shape')
+          return self.area() == obj.area()
+
+  class Rectangle(Shape):
+      def __init__(self, w, h):
+          self.w = w
+          self.h = h
+
+      def area(self):
+          return self.w * self.h
+
+  class Circle(Shape):
+      def __init__(self, r):
+          self.r = r
+      def area(self):
+          return self.r ** 2 * 3.14
+#+END_SRC
+两个类的实例是不支持大小比较的 通过复写__lt__ __eq__等方法 可以实现大小比较
+** 如何使用描述符对实例属性做类型检查？
+实际案例：
+在某项目中，我们实现一些类，并希望能像静态语言那样（c, c++, java)对他们的实例属
+性做检查。
+p = Person()
+p.name = 'bob' #必须是str
+p.age = 12 # 必须是int
+p.height = 1.83 # 必须是float
+
+解决方案：
+使用描述符来实现需要类型检查的属性：分别实现__get__,__set__, __delete__方法，
+在__set__内使用isinstance函数做类型检查
+#+BEGIN_SRC python
+  class Arrt:
+      def __init__(self, name, type_):
+          self.name = name
+          self.type_ = type_
+
+      def __get__(self, instance, cls):
+          return instance.__dict__[self.name]
+
+      def __set__(self, instance, value):
+          if not isinstance(value, self.type_):
+              raise TypeError('expected an %s' % self.type_)
+          instance.__dict__[self.name] = value
+
+      def __delete__(self, instance):
+          del instance.__dict__[self.name]
+
+
+  class person:
+      name = Arrt('name', str)
+      age = Arrt('age', int)
+      height = Arrt('height', float)
+
+
+  p = person()
+  p.name = 'bob'
+  print(p.name)
+  p.age = '12'
+
+output
+In [17]: bob
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-17-6e8dddb352e3> in <module>()
+----> 1 import codecs, os;__pyfile = codecs.open('''/var/folders/cb/bmq2h1x5559bztw7_k6q6h3r0000gn/T/py20879h9R''', encoding='''utf-8''');__code = __pyfile.read().encode('''utf-8''');__pyfile.close();os.remove('''/var/folders/cb/bmq2h1x5559bztw7_k6q6h3r0000gn/T/py20879h9R''');exec(compile(__code, '''/Users/lichunyang/org/python_base/python_advance.org[*Org Src python_advance.org[ python ]*]''', 'exec'));
+
+~/org/python_base/python_advance.org[*Org Src python_advance.org[ python ]*] in <module>()
+
+~/org/python_base/python_advance.org[*Org Src python_advance.org[ python ]*] in __set__(self, instance, value)
+
+TypeError: expected an <class 'int'>
+#+END_SRC
+** 如何在环装数据结构中管理内存？
+** 如何通过实例方法名字的字符串调用方法
+#+BEGIN_SRC python
+  from lib1 import Circle #假设三个类中计算面积使用的方法名都不相同
+  from lib2 import Triangle #('area','getArea','get_area)
+  from lib3 import Rectangle
+
+  def getArea(shape):
+      for name in ['area', 'getArea', 'get_area']:
+          f = getattr(shape, name, None)
+          if f:
+              return f()
+
+
+  shape1 = Circle(2)
+  shape2 = Triangle(3, 4, 5)
+  shape3 = Rectangle(6, 4)
+
+  shapes = [shape1, shape2, shape3]
+  print(map(getArea, shapes))
+#+END_SRC
+* 多线程编程核心技术案例进阶训练
+* 装饰器使用技巧案例进阶训练
+* python必学模块-collections
+** nametuple功能详解
+#+BEGIN_SRC python
+  from collections import namedtuple
+
+  User = namedtuple('User', ['name', 'age', 'height'])
+  user = User(name='lchy', age=29, height=175)
+  # In [1]: lchy 29 175
+  user_tuple = ('lchy', 24, 185)
+  user_list = ['lchy', 26, 180]
+  user = User(*user_list)
+  # In [2]: lchy 24 185
+  user_list = user._make(user_list)
+  print("user_list is {}".format(user_list))
+  # In [5]: user_list is User(name='lchy', age=26, height=180)
+  user_dict = user._asdict()
+  print(user_dict)
+  # In [3]: OrderedDict([('name', 'lchy'), ('age', 24), ('height', 185)])
+  print(user.name, user.age, user.height)
+#+END_SRC
+** defaultdict功能
+当传入key对应的value值不存在时自动生成默认value且volue的结构类型是可以自定义的
+#+BEGIN_SRC python
+  from collections import defaultdict
+
+  defaul_dict = defaultdict(int) # 当传入int是value默认为0 传入list默认为[]
+  user = ['bob', 'bob', 'jim', 'jim', 'aray']
+
+  for user in user:
+      defaul_dict[user] += 1
+  print(defaul_dict)
+  # In [14]: defaultdict(<class 'int'>, {'bob': 2, 'jim': 2, 'aray': 1})
+#+END_SRC
+#+BEGIN_SRC python
+  from collections import defaultdict
+
+  def gen_deafault(): #可以通过自定义函数生成特殊的结构
+      return {
+          'name': '',
+          'nums': 0
+      }
+  defaul_dict = defaultdict(gen_deafault) 
+  defaul_dict['group']
+  print(defaul_dict)
+  # In [15]: defaultdict(<function gen_deafault at 0x10eff8048>, {'group': {'name': '', 'nums': 0}})
+#+END_SRC
+** Counter
+#+BEGIN_SRC python
+  from collections import Counter
+
+  user = ['bob', 'bob', 'jim', 'jim', 'aray']
+  user_count = Counter(user)
+  print(user_count)
+  # In [16]: Counter({'bob': 2, 'jim': 2, 'aray': 1})
+  # 按大到小排序
+  str_count = Counter('hello world ni hao')
+  print(str_count)
+  # Counter({'l': 3, 'o': 3, ' ': 3, 'h': 2, 'e': 1, 'w': 1, 'r': 1, 'd': 1, 'n': 1, 'i': 1, 'a': 1})
+  str_count2 = Counter('english is a good language')
+  print(str_count2)
+  print(str_count2.most_common(3))
+  # [('g', 4), (' ', 4), ('a', 3)]
+#+END_SRC
+** deque
+

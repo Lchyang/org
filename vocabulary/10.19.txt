@@ -1,0 +1,15 @@
+The tasks you write will probably live in reusable（重复使用的） apps
+
+Let’s break down(分解) what happens in first module, first we import absolute(绝对，十分) imports from the future, so that our celery.py module won’t clash(冲突) with the library.
+
+This means that you don’t have to use multiple(多个) configuration files.
+
+The uppercase(upper case大写）name-space(命名空间） means that all Celery configuration options(选择）must be specified(具体说明) in uppercase instead of lowercase.
+
+To implement a priority(优先) queue using a heap
+
+Tree data structures have many things in common with their botanical(植物) cousins
+
+
+
+

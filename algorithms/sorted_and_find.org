@@ -1,0 +1,185 @@
+* 排序查找 
+** 查找
+*** 顺序查找
+无序表查找代码:
+#+BEGIN_SRC python
+  def quentialSearch(alist, item):
+      pos = 0
+      found = False
+
+      while pos < len(alist) and not found:
+          if alist[pos] == item:
+              found = True
+          else:
+              pos = pos + 1
+      return found
+
+
+  testlist = [1,2,32,8,17,19,42,13,0]
+#+END_SRC
+
+有序查找：
+#+BEGIN_SRC python
+  def orderdSequentialSearch(alist, item):
+      pos = 0
+      found = False
+      stop = False
+      while pos < len(alist) and not found and not stop:
+          if alist[pos] == item:
+              found = True
+          else:
+              if alist[pos] > item:
+                  found = True
+              else:
+                  pos = pos + 1
+      return found
+  testlist = [0,1,2,8,13,17,19,32,42]
+
+#+END_SRC
+
+
+算法复杂度都为O(n)有序排序可以优化一点但是数量级不变
+*** 二分查找
+#+BEGIN_SRC python
+  def binarySearch(alist, item):
+      first = 0
+      last = len(alist) - 1
+      found = False
+
+      while first <= last and not found:
+          mid = (first + last) //2
+          if alist[mid] == item:
+              found = True
+          else:
+              if item < alist[mid]:
+                  last = mid - 1
+              else:
+                  first = mid
+      return found
+
+#+END_SRC
+算法复杂度为O(logn)
+*** 散列
+能使得查找算法的复杂度降到 O(1)，这种概念称为“散列Hashing”
+
+好的散列函数需要具备3个特性:冲突最少(近似完美)、 计算难度低(额外开销小)、充分分散数据项(节约空间)
+
+ Python自带MD5和SHA系列的散列函数库:hashlib 包括了md5/sha1/sha224/sha256/sha384/sha512
+等6种散列函数
+** 排序
+*** 冒泡排序
+#+BEGIN_SRC python
+  def bubble_sort(alist):
+      count = len(alist)
+      for i in range(count):
+          for j in range(i+1,count):
+              if alist[i] > alist[j]:
+                  alist[i],alist[j] = alist[j],alist[i]
+      return alist
+#+END_SRC
+冒泡排序通常作为时间效率较差的排序算法，来作为其它算法的对比基准。 
+其效率主要差在每个数据项在找到其最终位置之前，必须要经过多次比对和交换，其中大部分的操作是无效的。
+但有一点优势，就是无需任何额外的存储空间开销。
+
+性能改进：
+#+BEGIN_SRC python
+  def short_bubble(alist):
+      count = len(alist)
+      exchange = True
+      num = 0
+      while num < count and exchange:
+          exchange = False
+          for i in range(num+1,count):
+              if alist[num] > alist[i]:
+                  exchange = True
+                  alist[num],alist[i] = alist[i], alist[num]
+      return alist
+#+END_SRC
+
+选择排序
+#+BEGIN_SRC python
+  def select_sort(alist):
+      count = len(alist)
+      for i in range(count):
+          min_num = i
+          for j in range(i+1,count):
+              if alist[i] > alist[j]:
+                  min_num = j
+          alist[i],alist[min_num] = alist[min_num],alist[i]
+      return alist
+#+END_SRC
+
+〉 选择排序对冒泡排序进行了改进，保留了其基本的多趟比对思路，每趟都使 当前最大项就位。
+〉 但选择排序对交换进行了削减，相比起冒泡排序进行多次交换，每趟仅进行1 次交换
+记录最大项的所在位置，最后再跟本趟最后一项交换
+〉 选择排序的时间复杂度比冒泡排序稍优 比对次数不变，还是O(n2)
+交换次数则减少为O(n)
+*** 插入排序
+插入排序的比对主要用来寻找“新项”的插入位置 最差情况是每趟都与子列表中所有项进行比对，
+总比对次数与冒泡排序相同，数量级仍是 O(n^2)
+最好情况，列表已经排好序的时候，每趟仅需1次比对，总次数是O(n)
+#+BEGIN_SRC python
+  def insert_sort(alist):
+      for i in range(1,len(alist)):
+          value = alist[i]
+          key = i
+          while key > 0 and alist[key-1] > value:
+              alist[key] = alist[key-1]
+              key -= 1
+          alist[key] = value
+      return alist
+#+END_SRC
+
+谢尔排序
+#+BEGIN_SRC python 
+  def shellSort(alist):
+      sublistcount = len(alist)//2
+      while sublistcount > 0:
+          for startpostion in rawnge(sublistcount):
+              gapInsertionSort(alist, startpostion, sublistcount)
+
+          print("After increments of size", sublistcount,
+                "This list is", alist)
+
+          sublistcount = sublistcount // 2
+
+  def gapInsertionSort(alist,start,gap):
+      for i in range(start+gap,len(alist),gap):
+          currentvalue = alist[i]
+          pos = i
+
+          while pos >= gap and alist[pos-gap] > currentvalue:
+              alistp[pos] = alist[pos-gap]
+              pos = pos - gap
+          alistp[pos] = currentvalue
+#+END_SRC
+
+*** 快速排序
+  快速排序的思路是依据一个“中值”数据项来把数据表分为两半:小于中值 的一半和大于中值的一半，
+然后每部分分别进行快速排序
+
+  如果希望这两半拥有相等数量的数据项，则应该找到数据表的“中位数” 但找中位数需要计算开销!
+要想没有开销，只能随意找一个数来充当“中值” 比如，第1个数。
+
+  快速排序的递归算法“递归三要素”如下: 基本结束条件:数据表仅有1个数据项，自然是排好序的;
+缩小规模:根据“中值”，将数据表分为两半，最好情况是相等规模的两半
+调用自身:将两半分别调用自身进行排序(排序基本操作在分裂过程中)
+#+BEGIN_SRC python 
+  def quicksort(alist):
+      if len(alist) <= 1:
+          return alist
+      left = []
+      right = []
+      base = alist.pop()
+
+      for i in alist:
+          if i < base:
+              left.append(i)
+          else:
+              right.append(i)
+
+      return quicksort(left) + [base] + quicksort(right)
+
+#+END_SRC
+
+* 树及算法

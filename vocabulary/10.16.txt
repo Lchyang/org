@@ -1,0 +1,15 @@
+we need to address(处理，解决） the important question of where in the linked list to place the new item.
+
+The next methods that we will implement-size, search, and remove-are all based on a technique（方法，技术） know as linked list traversal.(链表遍历）
+
+Traversal refers to(指的是） the process of（的过程） systematically（有条理的） visiting each node.
+
+assignment statement（任务声明）（赋值语句）
+
+As an example, consider invoking(调用，使用） the search method looking the item 17.
+
+As you can see the overall infrastructure(基础设施) is fully micro-service(微服务）based and the logic(逻辑) completely separated(分离), even with different technologies.
+
+But there is a catch(不利因素): because the language is easy to learn and put to use, many practicing Python programmers leverage(利用) only a fraction of(一小部分) its powerful features.
+
+This book is not A-to-Z exhaustive reference(全面的参考) of Python. Its emphasis(强调，侧重点) is on the language features that are either unique to Python or not found in many other popular languages.

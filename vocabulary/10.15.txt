@@ -1,0 +1,14 @@
+For simplicity we will assume that lists cannot contain duplicate(重复）items.
+
+comma-delimited 逗号分隔
+
+We need to be sure that we maintain(维持）the relative positioning(相对位置) of the items.
+
+There is no requirement that we maintain that positioning in contiguous （连续）memory.
+
+It is important to note the location of the first item of the list must be explicitly specified(具体说明）
+
+The external(外部）reference(引用）is often referred to as the head of the list.
+
+each linked to the next by explicit references(显示引用）
+

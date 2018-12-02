@@ -15,6 +15,7 @@
  collections 中 deque
 ** TODO 对象迭代与反迭代案例进阶训练
    DEADLINE: <2018-12-02 Sun 00:00>
+*** 如何实现可迭代对象和迭代器对象
 ** TODO 字符串处理案例进阶训练
 *** 如何拆分含多种分隔符的字符串
  案例：要把某个字符串依据分隔符拆分成不同的字段
@@ -633,180 +634,272 @@ extend方法传递一个可迭代对象，可以是list、tuple、set、只因�
 
 
 #+END_SRC
-** 静态方法类方法以及实例方法以及参数
+*** 静态方法类方法以及实例方法以及参数
+ #+BEGIN_SRC python
+   class Date:
+       #构造函数
+       def __init__(self, year, month, day):
+           self.year = year
+           self.month = month
+           self.day = day
+
+       def tomorrow(self):
+           self.day += 1
+
+       @staticmethod #当我们需要处理一些和实例方法和实例参数无关的逻辑时（就是可以在类外面处理的）
+ # 为了方便组织代码，把他移到类的内部，使用静态方法
+       def parse_from_string(date_str):
+           year, month, day = tuple(date_str.split("-"))
+           return Date(int(year), int(month), int(day))
+
+       @staticmethod
+       def valid_str(date_str):
+           year, month, day = tuple(date_str.split("-"))
+           if int(year)>0 and (int(month) >0 and int(month)<=12) and (int(day) >0 and int(day)<=31):
+               return True
+           else:
+               return False
+
+       @classmethod #避免实例方法中的类的硬解码传递一个类的参数
+       def from_string(cls, date_str):
+           year, month, day = tuple(date_str.split("-"))
+           return cls(int(year), int(month), int(day))
+
+       def __str__(self):
+           return "{year}/{month}/{day}".format(year=self.year, month=self.month, day=self.day)
+
+   if __name__ == "__main__":
+       new_day = Date(2018, 12, 31)
+       new_day.tomorrow()
+       print(new_day)
+
+       #2018-12-31
+       date_str = "2018-12-31"
+       year, month, day = tuple(date_str.split("-"))
+       new_day = Date(int(year), int(month), int(day))
+       print (new_day)
+
+       #用staticmethod完成初始化
+       new_day = Date.parse_from_string(date_str)
+       print (new_day)
+
+       #用classmethod完成初始化
+       new_day = Date.from_string(date_str)
+       print(new_day)
+
+       print(Date.valid_str("2018-12-32"))
+ #+END_SRC
+*** python类的私有属性
+ python 用双下划线隐藏私有变量，其实内部转换为_classname__attr.
+*** python的自省机制
+ #+BEGIN_SRC python
+   #自省是通过一定的机制查询到对象的内部结构
+   from chapter04.class_method import Date
+   class Person:
+       """
+       人
+       """
+       name = "user"
+
+   class Student(Person):
+       def __init__(self, scool_name):
+           self.scool_name = scool_name
+
+   if __name__ == "__main__":
+       user = Student("慕课网")
+
+       通过__dict__查询属性
+       print(user.__dict__)
+       user.__dict__["school_addr"] = "北京市"
+       print(user.school_addr)
+       print(Person.__dict__) #类的属性比实例属性多 而使用dir更加强大
+       print(user.name)
+       a = [1,2]
+       print(dir(a))
+ #+END_SRC
+*** super真的是调用父类吗？
+ #+BEGIN_SRC python
+   # from threading import Thread
+   # class MyThread(Thread):
+   #     def __init__(self, name, user):
+   #         self.user = user
+   #         super().__init__(name=name)
+
+   #既然我们重写B的构造函数， 为什么还要去调用super？
+   #super到底执行顺序是什么样的？
+
+   class A:
+       def __init__(self):
+           print ("A")
+
+   class B(A):
+       def __init__(self):
+           print ("B")
+           super().__init__()
+
+   class C(A):
+       def __init__(self):
+           print ("C")
+           super().__init__() # 如果注释掉这行结果是 D,B,A吗？结果是D,B,C
+
+   class D(B, C):
+       def __init__(self):
+           print ("D")
+           super(D, self).__init__()
+
+   # if __name__ == "__main__":
+   print(D.__mro__) #查看mro顺序
+   d = D()
+
+   In [3]: (<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, 
+ <class '__main__.A'>, <class 'object'>)
+   D
+   B
+   C
+   A
+ # super调用的其实不是严格意义上的父类 而是以mro顺序去查找
+ #+END_SRC
+*** python中的mixin
+*** python中的with语句
+ #+BEGIN_SRC python
+   #try except finally
+   def exe_try():    #关于try except, finally 的return问题 按执行顺序一次把return结果
+       try:          # 压入栈中最后取栈顶的结果
+           print ("code started")
+           raise KeyError
+           return 1
+       except KeyError as e:
+           print ("key error")
+           return 2
+       else:  # 当异常不触发是 执行else语句
+           print ("other error")
+           return 3
+       finally:
+           print ("finally")
+           # return 4
+
+   #上下文管理器协议
+   class Sample:
+       def __enter__(self):
+           print ("enter")
+           #获取资源
+           return self
+       def __exit__(self, exc_type, exc_val, exc_tb):
+           #释放资源
+           print ("exit")
+       def do_something(self):
+           print ("doing something")
+
+   with Sample() as sample:
+       sample.do_something()
+
+   # if __name__ == "__main__":
+   #     result = exe_try()
+   #     print (result)
+ #+END_SRC
+*** 使用contextlib简化上下文管理器
+ #+BEGIN_SRC python
+   import contextlib
+
+   @contextlib.contextmanager
+   def file_open(file_name):
+       print ("file open") 类似__enter__
+       yield {}
+       print ("file end")  类似__exit__
+
+   with file_open("bobby.txt") as f_opened:
+       print ("file processing")
+
+ #+END_SRC
+** 自定义序列类 
+*** 序列类型分类
+**** 容器序列 (list, tuple, deque)
+**** 扁平序列 (str, bytes, bytearray, array.array)
+**** 可变序列 (list, deque, bytearray, arry)
+**** 不可变序列 (str, tuple, bytes)
+*** list 中的 + += extend append 的区别
 #+BEGIN_SRC python
-  class Date:
-      #构造函数
-      def __init__(self, year, month, day):
-          self.year = year
-          self.month = month
-          self.day = day
+  my_list = []
+  my_list.append(1)
+  my_list.append("a")
 
-      def tomorrow(self):
-          self.day += 1
+  from collections import abc
 
-      @staticmethod #当我们需要处理一些和实例方法和实例参数无关的逻辑时（就是可以在类外面处理的）
-# 为了方便组织代码，把他移到类的内部，使用静态方法
-      def parse_from_string(date_str):
-          year, month, day = tuple(date_str.split("-"))
-          return Date(int(year), int(month), int(day))
+  a = [1,2]
+  c = a + [3,4]   #只能是同一个类型的对象
 
-      @staticmethod
-      def valid_str(date_str):
-          year, month, day = tuple(date_str.split("-"))
-          if int(year)>0 and (int(month) >0 and int(month)<=12) and (int(day) >0 and int(day)<=31):
+  #就地加
+  # a += (3,4) #实现的是 extend方法 传递一个可迭代对象
+  # 
+  # a.extend(range(3))
+
+  a.append((1,2)) # append的是什么就相当于一个元素加入list
+  print(a)
+#+END_SRC
+*** 实现可切片的对象
+#+BEGIN_SRC python
+  import numbers
+  class Group:    # 在collection abc 中找到不可变序列的抽象基类 重写函数
+      #支持切片操作
+      def __init__(self, group_name, company_name, staffs):
+          self.group_name = group_name
+          self.company_name = company_name
+          self.staffs = staffs
+
+      def __reversed__(self):
+          self.staffs.reverse()
+
+      def __getitem__(self, item):
+          cls = type(self)
+          if isinstance(item, slice):
+              return cls(group_name=self.group_name, company_name=self.company_name, staffs=self.staffs[item])
+          elif isinstance(item, numbers.Integral):
+              return cls(group_name=self.group_name, company_name=self.company_name, staffs=[self.staffs[item]])
+
+      def __len__(self):
+          return len(self.staffs)
+
+      def __iter__(self):
+          return iter(self.staffs)
+
+      def __contains__(self, item):
+          if item in self.staffs:
               return True
           else:
               return False
 
-      @classmethod #避免实例方法中的类的硬解码传递一个类的参数
-      def from_string(cls, date_str):
-          year, month, day = tuple(date_str.split("-"))
-          return cls(int(year), int(month), int(day))
-
-      def __str__(self):
-          return "{year}/{month}/{day}".format(year=self.year, month=self.month, day=self.day)
-
-  if __name__ == "__main__":
-      new_day = Date(2018, 12, 31)
-      new_day.tomorrow()
-      print(new_day)
-
-      #2018-12-31
-      date_str = "2018-12-31"
-      year, month, day = tuple(date_str.split("-"))
-      new_day = Date(int(year), int(month), int(day))
-      print (new_day)
-
-      #用staticmethod完成初始化
-      new_day = Date.parse_from_string(date_str)
-      print (new_day)
-
-      #用classmethod完成初始化
-      new_day = Date.from_string(date_str)
-      print(new_day)
-
-      print(Date.valid_str("2018-12-32"))
+  staffs = ["bobby1", "imooc", "bobby2", "bobby3"]
+  group = Group(company_name="imooc", group_name="user", staffs=staffs)
+  reversed(group)
+  for user in group:
+      print(user)
 #+END_SRC
-** python类的私有属性
-python 用双下划线隐藏私有变量，其实内部转换为_classname__attr.
-** python的自省机制
+*** bisect维护已排序序列
 #+BEGIN_SRC python
-  #自省是通过一定的机制查询到对象的内部结构
-  from chapter04.class_method import Date
-  class Person:
-      """
-      人
-      """
-      name = "user"
+  import bisect
+  from collections import deque
 
-  class Student(Person):
-      def __init__(self, scool_name):
-          self.scool_name = scool_name
+  #用来处理已排序的序列，用来维持已排序的序列， 升序
+  #二分查找
+  inter_list = deque()
+  bisect.insort(inter_list, 3)
+  bisect.insort(inter_list, 2)
+  bisect.insort(inter_list, 5)
+  bisect.insort(inter_list, 1)
+  bisect.insort(inter_list, 6)
 
-  if __name__ == "__main__":
-      user = Student("慕课网")
-
-      通过__dict__查询属性
-      print(user.__dict__)
-      user.__dict__["school_addr"] = "北京市"
-      print(user.school_addr)
-      print(Person.__dict__) #类的属性比实例属性多 而使用dir更加强大
-      print(user.name)
-      a = [1,2]
-      print(dir(a))
+  print(bisect.bisect_left(inter_list, 3))
+  #学习成绩
+  print(inter_list)
 #+END_SRC
-** super真的是调用父类吗？
+*** 什么时候应该使用列表，什么时候不使用列表
 #+BEGIN_SRC python
-  # from threading import Thread
-  # class MyThread(Thread):
-  #     def __init__(self, name, user):
-  #         self.user = user
-  #         super().__init__(name=name)
-
-  #既然我们重写B的构造函数， 为什么还要去调用super？
-  #super到底执行顺序是什么样的？
-
-  class A:
-      def __init__(self):
-          print ("A")
-
-  class B(A):
-      def __init__(self):
-          print ("B")
-          super().__init__()
-
-  class C(A):
-      def __init__(self):
-          print ("C")
-          super().__init__() # 如果注释掉这行结果是 D,B,A吗？结果是D,B,C
-
-  class D(B, C):
-      def __init__(self):
-          print ("D")
-          super(D, self).__init__()
-
-  # if __name__ == "__main__":
-  print(D.__mro__) #查看mro顺序
-  d = D()
-
-  In [3]: (<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, 
-<class '__main__.A'>, <class 'object'>)
-  D
-  B
-  C
-  A
-# super调用的其实不是严格意义上的父类 而是以mro顺序去查找
+  # array, deque
+  # 数组
+  import array
+  #array和list的一个重要区别， array只能存放指定的数据类型
+  my_array = array.array("i")
+  my_array.append(1)
+  my_array.append("abc")
 #+END_SRC
-** python中的mixin
-** python中的with语句
-#+BEGIN_SRC python
-  #try except finally
-  def exe_try():    #关于try except, finally 的return问题 按执行顺序一次把return结果
-      try:          # 压入栈中最后取栈顶的结果
-          print ("code started")
-          raise KeyError
-          return 1
-      except KeyError as e:
-          print ("key error")
-          return 2
-      else:  # 当异常不触发是 执行else语句
-          print ("other error")
-          return 3
-      finally:
-          print ("finally")
-          # return 4
-
-  #上下文管理器协议
-  class Sample:
-      def __enter__(self):
-          print ("enter")
-          #获取资源
-          return self
-      def __exit__(self, exc_type, exc_val, exc_tb):
-          #释放资源
-          print ("exit")
-      def do_something(self):
-          print ("doing something")
-
-  with Sample() as sample:
-      sample.do_something()
-
-  # if __name__ == "__main__":
-  #     result = exe_try()
-  #     print (result)
-#+END_SRC
-** 使用contextlib简化上下文管理器
-#+BEGIN_SRC python
-  import contextlib
-
-  @contextlib.contextmanager
-  def file_open(file_name):
-      print ("file open")
-      yield {}
-      print ("file end")
-
-  with file_open("bobby.txt") as f_opened:
-      print ("file processing")
-
-#+END_SRC
+*** 列表推导式，生成器，字典推导式

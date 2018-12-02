@@ -903,3 +903,345 @@ extend方法传递一个可迭代对象，可以是list、tuple、set、只因�
   my_array.append("abc")
 #+END_SRC
 *** 列表推导式，生成器，字典推导式
+** 深入python的set和dict
+*** dict常用方法
+#+BEGIN_SRC python
+  a = {"bobby1":{"company":"imooc"},
+       "bobby2": {"company": "imooc2"}
+       }
+  #clear
+  # a.clear()
+  # pass
+
+  #copy, 返回浅拷贝
+  new_dict = a.copy()
+  new_dict["bobby1"]["company"] = "imooc3"
+
+  #formkeys
+  new_list = ["bobby1", "bobby2"]
+
+  new_dict = dict.fromkeys(new_list, {"company":"imooc"})
+
+  new_dict.update((("bobby","imooc"),)) #创建字典神器， 传入可迭代对象 可以传键值
+#+END_SRC
+*** dict子类
+#+BEGIN_SRC python
+  #不建议继承list和dict
+  class Mydict(dict):
+      def __setitem__(self, key, value):
+          super().__setitem__(key, value*2)
+
+  my_dict = Mydict(one=1)
+  my_dict["one"] = 1
+  print (my_dict)
+
+  from collections import UserDict
+
+  class Mydict(UserDict):
+      def __setitem__(self, key, value):
+          super().__setitem__(key, value*2)
+
+  my_dict = Mydict(one=1)
+  # my_dict["one"] = 1
+  print (my_dict)
+
+  from collections import defaultdict
+
+  my_dict = defaultdict(dict)
+  my_value = my_dict["bobby"]
+  pass
+#+END_SRC
+*** set和frozenset
+#+BEGIN_SRC python
+  #set 集合 fronzenset (不可变集合) 无序， 不重复
+  # s = set('abcdee')
+  # s = set(['a','b','c','d','e'])
+  s = {'a','b', 'c'}
+  # s = frozenset("abcde") #frozenset 可以作为dict的key
+  # print(s)
+
+  #向set添加数据
+  another_set = set("cef")
+  re_set = s.difference(another_set)
+  re_set = s - another_set
+  re_set = s & another_set
+  re_set = s | another_set
+
+  #set性能很高
+  # | & -  #集合运算
+  print(re_set)
+
+  print (s.issubset(re_set))
+  # if "c" in re_set:
+  #     print ("i am in set")
+#+END_SRC
+*** dict和set实现原理
+#+BEGIN_SRC python
+
+  from random import randint
+
+
+  def load_list_data(total_nums, target_nums):
+      """
+      从文件中读取数据，以list的方式返回
+      :param total_nums: 读取的数量
+      :param target_nums: 需要查询的数据的数量
+      """
+      all_data = []
+      target_data = []
+      file_name = "G:/慕课网课程/AdvancePython/fbobject_idnew.txt"
+      with open(file_name, encoding="utf8", mode="r") as f_open:
+          for count, line in enumerate(f_open):
+              if count < total_nums:
+                  all_data.append(line)
+              else:
+                  break
+
+      for x in range(target_nums):
+          random_index = randint(0, total_nums)
+          if all_data[random_index] not in target_data:
+              target_data.append(all_data[random_index])
+              if len(target_data) == target_nums:
+                  break
+
+      return all_data, target_data
+
+  def load_dict_data(total_nums, target_nums):
+      """
+      从文件中读取数据，以dict的方式返回
+      :param total_nums: 读取的数量
+      :param target_nums: 需要查询的数据的数量
+      """
+      all_data = {}
+      target_data = []
+      file_name = "G:/慕课网课程/AdvancePython/fbobject_idnew.txt"
+      with open(file_name, encoding="utf8", mode="r") as f_open:
+          for count, line in enumerate(f_open):
+              if count < total_nums:
+                  all_data[line] = 0
+              else:
+                  break
+      all_data_list = list(all_data)
+      for x in range(target_nums):
+          random_index = randint(0, total_nums-1)
+          if all_data_list[random_index] not in target_data:
+              target_data.append(all_data_list[random_index])
+              if len(target_data) == target_nums:
+                  break
+
+      return all_data, target_data
+
+
+  def find_test(all_data, target_data):
+      #测试运行时间
+      test_times = 100
+      total_times = 0
+      import time
+      for i in range(test_times):
+          find = 0
+          start_time = time.time()
+          for data in target_data:
+              if data in all_data:
+                  find += 1
+          last_time = time.time() - start_time
+          total_times += last_time
+      return total_times/test_times
+
+
+  if __name__ == "__main__":
+      # all_data, target_data = load_list_data(10000, 1000)
+      # all_data, target_data = load_list_data(100000, 1000)
+      # all_data, target_data = load_list_data(1000000, 1000)
+
+
+      # all_data, target_data = load_dict_data(10000, 1000)
+      # all_data, target_data = load_dict_data(100000, 1000)
+      # all_data, target_data = load_dict_data(1000000, 1000)
+      all_data, target_data = load_dict_data(2000000, 1000)
+      last_time = find_test(all_data, target_data)
+
+      #dict查找的性能远远大于list
+      #在list中随着list数据的增大 查找时间会增大
+      #在dict中查找元素不会随着dict的增大而增大
+      print(last_time)
+
+  #1.  dict的key或者set的值 都必须是可以hash的
+  #不可变对象 都是可hash的， str， fronzenset， tuple，自己实现的类 __hash__
+  #2. dict的内存花销大，但是查询速度快， 自定义的对象 或者python内部的对象都是用dict包装的
+  # 3. dict的存储顺序和元素添加顺序有关
+  # 4. 添加数据有可能改变已有数据的顺序
+#+END_SRC
+** 对象引用、可变性和垃圾回收
+*** python中的变量是什么？
+*** python的垃圾回收和del
+*** 一个典型的错误
+#+BEGIN_SRC python
+  def add(a, b):
+      a += b
+      return a
+
+  class Company:
+      def __init__(self, name, staffs=[]):
+          self.name = name
+          self.staffs = staffs
+      def add(self, staff_name):
+          self.staffs.append(staff_name)
+      def remove(self, staff_name):
+          self.staffs.remove(staff_name)
+
+  if __name__ == "__main__":
+      com1 = Company("com1", ["bobby1", "bobby2"])
+      com1.add("bobby3")
+      com1.remove("bobby1")
+      print (com1.staffs)
+
+      com2 = Company("com2") #当com2,com3都不传递list参数是会默认使用defaults参数
+      com2.add("bobby")      #会使com2，com3中的数据互相影响
+      print(com2.staffs)
+
+      print (Company.__init__.__defaults__)
+
+      com3 = Company("com3")
+      com3.add("bobby5")
+      print (com2.staffs)
+      print (com3.staffs)
+      print (com2.staffs is com3.staffs)
+
+      # a = 1
+      # b = 2
+      #
+      # a = [1,2]
+      # b = [3,4]
+      #
+      # a = (1, 2)
+      # b = (3, 4)
+      #
+      # c = add(a, b)
+      #
+      # print(c)
+      # print(a, b)
+#+END_SRC
+** 元类编程
+*** property动态属性
+*** __getattr__, __getattribute__ 区别
+#+BEGIN_SRC python
+  #__getattr__, __getattribute__
+  #__getattr__ 就是在查找不到属性的时候调用
+  from datetime import date
+  class User:
+      def __init__(self,info={}):
+          self.info = info
+
+      def __getattr__(self, item):
+          return self.info[item]
+
+      # def __getattribute__(self, item):
+      #     return "bobby"
+
+  if __name__ == "__main__":
+      user = User(info={"company_name":"imooc", "name":"bobby"})
+      print(user.test)
+#+END_SRC
+*** 属性描述符和属性查找过程
+#+BEGIN_SRC python
+  from datetime import date, datetime
+  import numbers
+
+  class IntField:
+      #数据描述符
+      def __get__(self, instance, owner):
+          return self.value
+      def __set__(self, instance, value):
+          if not isinstance(value, numbers.Integral):
+              raise ValueError("int value need")
+          if value < 0:
+              raise ValueError("positive value need")
+          self.value = value
+      def __delete__(self, instance):
+          pass
+
+
+  class NonDataIntField:
+      #非数据属性描述符
+      def __get__(self, instance, owner):
+          return self.value
+
+  class User:
+      age = IntField()
+      # age = NonDataIntField()
+
+  '''
+  如果user是某个类的实例，那么user.age（以及等价的getattr(user,’age’)）
+  首先调用__getattribute__。如果类定义了__getattr__方法，
+  那么在__getattribute__抛出 AttributeError 的时候就会调用到__getattr__，
+  而对于描述符(__get__）的调用，则是发生在__getattribute__内部的。
+  user = User(), 那么user.age 顺序如下：
+
+  （1）如果“age”是出现在User或其基类的__dict__中， 且age是data descriptor， 那么调用其__get__方法, 否则
+
+  （2）如果“age”出现在user的__dict__中， 那么直接返回 obj.__dict__[‘age’]， 否则
+
+  （3）如果“age”出现在User或其基类的__dict__中
+
+  （3.1）如果age是non-data descriptor，那么调用其__get__方法， 否则
+
+  （3.2）返回 __dict__[‘age’]
+
+  （4）如果User有__getattr__方法，调用__getattr__方法，否则
+
+  （5）抛出AttributeError
+
+  '''
+
+  # class User:
+  #
+  #     def __init__(self, name, email, birthday):
+  #         self.name = name
+  #         self.email = email
+  #         self.birthday = birthday
+  #         self._age = 0
+  #
+  #     # def get_age(self):
+  #     #     return datetime.now().year - self.birthday.year
+  #
+  #     @property
+  #     def age(self):
+  #         return datetime.now().year - self.birthday.year
+  #
+  #     @age.setter
+  #     def age(self, value):
+  #         #检查是否是字符串类型
+  #         self._age = value
+
+  if __name__ == "__main__":
+      user = User()
+      user.__dict__["age"] = "abc"
+      print (user.__dict__)
+      print (user.age)
+      # print (getattr(user, 'age'))
+      # user = User("bobby", date(year=1987, month=1, day=1))
+      # user.age = 30
+      # print (user._age)
+      # print(user.age)
+
+
+#+END_SRC
+*** __new__,__init__的区别
+#+BEGIN_SRC python
+  class User:
+      def __new__(cls, *args, **kwargs):
+          print (" in new ")
+          return super().__new__(cls)
+      def __init__(self, name):
+          print (" in init")
+          pass
+  a = int()
+  #new 是用来控制对象的生成过程， 在对象生成之前
+  #init是用来完善对象的
+  #如果new方法不返回对象， 则不会调用init函数
+  if __name__ == "__main__":
+      user = User(name="bobby")
+#+END_SRC
+*** 自定义元类
+** python Socket编程
+

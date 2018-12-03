@@ -117,7 +117,230 @@
          r'\g<month>/\g<day>/\g<year>', log)
    # 第一种使用引用计数方法 第二种属于引用名字方法。
  #+END_SRC
+*** 如何将多个小字符串拼接成大的字符串
+有字符串['a','b', 1, 2, 'c', 'd']如何拼接成大的字符串
+
+使用+号 每次迭代存在浪费
+#+BEGIN_SRC python
+  In [38]: l = ['a', 'b','c']
+
+  In [39]: s = ''
+
+  In [40]: for x in l:
+      ...:     s += x
+      ...:
+
+  In [41]: s
+  Out[41]: 'abc'
+
+  In [42]: for x in l:
+      ...:     s += x
+      ...:     print(s)
+      ...:
+  abca
+  abcab
+  abcabc
+#+END_SRC
+
+使用str.join()
+#+BEGIN_SRC python
+  In [44]: l
+  Out[44]: ['a', 'b', 'c']
+
+  In [45]: s = ''
+
+  In [46]: ''.join(l)
+  Out[46]: 'abc'
+
+  In [47]: l = ['a', 1, 'b'] #当有整数时记得转换成str
+
+  In [48]: ''.join(l)
+  ---------------------------------------------------------------------------
+  TypeError                                 Traceback (most recent call last)
+  <ipython-input-48-9e05f63092b3> in <module>()
+  ----> 1 ''.join(l)
+
+  TypeError: sequence item 1: expected str instance, int found
+
+  In [49]: ''.join([str(x) for x in s])
+  Out[49]: ''
+
+  In [50]: ''.join([str(x) for x in l]) #使用列表解析存在空间浪费
+  Out[50]: 'a1b'
+
+  In [51]: ''.join(str(x) for x in l) #建议使用生成器
+  Out[51]: 'a1b'
+#+END_SRC
+*** 如何对字符串进行左右居中对齐
+某个字典中存储了一系列属性值，
+{'lodDist': 100.0,
+'SmallCull': 0.05,
+'DistCull': 500,
+'trulinear': 40,
+'farclip': 477}
+如何将其工整的输出
+str.ljust, str.rjust, str.center
+#+BEGIN_SRC python
+  In [92]: s = 'abc'
+
+  In [96]: s.ljust?
+  Docstring:
+  S.ljust(width[, fillchar]) -> str
+
+  Return S left-justified in a Unicode string of length width. Padding is
+  done using the specified fill character (default is a space).
+  Type:      builtin_function_or_method
+
+
+  In [97]: s.ljust(20)
+  Out[106]: 'abc                 '
+
+  In [130]: s.rjust(20, '-')
+  Out[146]: '-----------------abc'
+
+  In [147]: s.center(20, '0')
+  Out[165]: '00000000abc000000000'
+#+END_SRC
+
+使用format
+#+BEGIN_SRC python
+  In [166]: format?
+  Signature: format(value, format_spec='', /)
+  Docstring:
+  Return value.__format__(format_spec)
+
+  format_spec defaults to the empty string.
+  See the Format Specification Mini-Language section of help('FORMATTING') for
+  details.
+  Type:      builtin_function_or_method
+
+
+  In [172]: s
+  Out[172]: 'abc'
+
+  In [173]: format(s, '<20')
+  Out[243]: 'abc                 '
+
+  In [244]: format(s, '>20')
+  Out[260]: '                 abc'
+
+  In [261]: format(s, '^20')
+  Out[283]: '        abc         '
+#+END_SRC
+
+解决问题：
+#+BEGIN_SRC python
+  In [284]: d = {'lodDist': 100.0,
+  'SmallCull': 0.05,
+  'DistCull': 500,
+  'trulinear': 40,
+  'farclip': 477}
+
+  In [291]: d.keys()
+  Out[297]: dict_keys(['lodDist', 'SmallCull', 'DistCull', 'trulinear', 'farclip'])
+
+  In [317]: w = max(map(len, d.keys()))
+
+  In [332]: for k in d:
+       ...:     print (k.ljust(w), ':', d[k])
+
+  SmallCull : 0.05
+  DistCull  : 500
+  trulinear : 40
+  farclip   : 477
+
+#+END_SRC
+*** 如何去掉字符串中不需要的字符
+
+第一种 使用 strip
+#+BEGIN_SRC python
+  In [65]: s = '   abc 123'
+
+  In [66]: s.strip()
+  Out[66]: 'abc 123'
+
+  In [67]: s.strip('3')
+  Out[67]: '   abc 12'
+
+  In [68]: s.strip?
+  Docstring:
+  S.strip([chars]) -> str
+
+  Return a copy of the string S with leading and trailing
+  whitespace removed.
+  If chars is given and not None, remove characters in chars instead.
+  Type:      builtin_function_or_method
+
+  In [69]: s.lstrip()
+  Out[69]: 'abc 123'
+
+  In [70]: s.rstrip()
+  Out[70]: '   abc 123'
+
+  In [71]: s = '---abc+++'
+
+  In [72]: s.strip('-+')
+  Out[72]: 'abc'
+#+END_SRC
+第二种 使用切片 拼接的方式
+
+第三种：字符串replace方法， 或者使用正则表达式re.sub()删除任意字符
+#+BEGIN_SRC python
+  In [74]: s
+  Out[74]: '\tabc\t123\txyz'
+
+  In [75]: s.replace('\t', '') # replace 只能替换一种字符
+  Out[75]: 'abc123xyz'
+
+  In [78]: s = '\tabc\t123\txyz\ropt\r'
+
+  In [79]: import re
+
+  In [80]: re.sub('[\t\r]', '', s)  # re.sub 可以替换多种字符
+  Out[80]: 'abc123xyzopt'
+#+END_SRC
 ** 文件I/O高效处理案例训练
+*** 如何读写文本文件
+**** python2 中读写字符串
+python2 中默认的str是二进制编码，支持中文的是unicode字符串
+#+BEGIN_SRC python
+  In [4]: f = open('py2.txt', 'w')
+
+  In [5]: s = u'你好'
+
+  In [6]: f.write(s.encode('gbk'))
+
+  In [7]: f.close()
+
+  In [9]: f = open('py2.txt', 'r')
+
+  In [10]: t = f.read()
+
+  In [11]: t
+  Out[11]: '\xc4\xe3\xba\xc3'
+
+  In [12]: print t.decode('gbk')
+  你好
+#+END_SRC
+**** python3 中读写字符串
+python3 中默认的str形式就是unicode形式，二进制形式用 b'abc' 且open函数用t指定文
+本模式，encoding 指定编码格式。
+#+BEGIN_SRC python
+  In [1]: f = open('py3.txt', 'wt', encoding='gbk')
+
+  In [2]: f.write('你好')
+  Out[2]: 2
+
+  In [3]: f.close()
+
+  In [4]: f = open('py3.txt', 'rt', encoding='gbk')
+
+  In [5]: print(f.read())
+  你好
+
+  In [6]: f.close()
+#+END_SRC
+** 
 ** csv, json, xml, excel 高效解析案例进阶训练
 ** 类与对象深度技术案例进阶训练
 *** 如何派生内置不可变类型并修改其实例化行为？
@@ -316,7 +539,167 @@
  #+END_SRC
 ** 多线程编程核心技术案例进阶训练
 ** 装饰器使用技巧案例进阶训练
+*** 如何使用装饰器
+某些时候我们想为多个函数，统一添加某种功能，比如计时统计，记录日志，缓存计算等。
+我们不想在每个函数内一一添加完全相同的代码，这是就需要用到装饰器
 
+比如为了解决斐波那契数列重复调用的问题，给函数增加缓存。
+#+BEGIN_SRC python
+  def memo(func):
+      cache = {}
+
+      def wrap(*args):
+          if args not in cache:
+              cache[args] = func(*args)
+          return cache[args]
+      return wrap
+
+
+  @memo
+  def fibonacci(n):
+      if n <= 1:
+          return 1
+      return fibonacci(n-1) + fibonacci(n-2)
+
+
+  @memo
+  def climb(n, steps):
+      count = 0
+      if n == 0:
+          count = 1
+      elif n > 0:
+          for step in steps:
+              count += climb(n - step, steps)
+      return count
+#+END_SRC
+*** 如何为被装饰的函数保存元数据
+在函数对象中保存着一些函数的元数据，例如： 
+f.__name__, f.__doc__, f.__moudle__...等。
+在我们使用装饰器后，再使用上面这些属性访问时，看到的是内部包裹函数的元数据，原
+理的函数的元数据便丢失了。
+#+BEGIN_SRC python
+  def mydecorator(func):
+      def wrapper(*args, **kargs):
+          '''wrapper function'''
+          print('In wrapper')
+          func(*args, **kargs)
+      return wrapper
+
+
+  @mydecorator
+  def example():
+      '''example function'''
+      print('in example')
+
+
+  print(example.__name__)
+  print(example.__doc__)
+
+  # In [44]: example  没有装饰器的结果
+  # example function
+
+  # In [45]: wrapper  有装饰器的结果
+  # wrapper function
+#+END_SRC
+如何解决
+#+BEGIN_SRC python
+  from functools import update_wrapper, wraps
+
+
+  @wraps #使用update_wrapper 可以解决这个问题，wrap是update_wrapper的快捷函数同样可以.
+  def mydecorator(func):
+      def wrapper(*args, **kargs):
+          '''wrapper function'''
+          print('In wrapper')
+          func(*args, **kargs)
+      # update_wrapper(wrapper, func)
+      return wrapper
+
+
+  @mydecorator
+  def example():
+      '''example function'''
+      print('in example')
+
+
+  print(example.__name__)
+  print(example.__doc__)
+
+  # In [46]: example 
+  # example function
+#+END_SRC
+*** 如何定义带参数装饰器
+实现一个装饰器，它用来检查被装饰函数的参数的类型。装饰器可以通过参数指明函数参
+数类型，调用时如果检测出类型不匹配这抛出异常。
+解决办法：
+提取函数的签名：inspect.signature()
+带参数的装饰器，依旧是根据参数定制化一个装饰器，可以看成生成生成器的工厂，每次
+调用typeassert，返回一个特定的装饰器，然后用它装饰其他函数。
+#+BEGIN_SRC python
+  from inspect import signature
+
+
+  def typeassert(*ty_args, **ty_kargs):
+      def decorator(func):
+          # fnc -> a, b  需要知道函数有哪些参数
+          # d = {'a': int, 'b', str} 通过函数参数和传入的类型构造字典()
+          sig = signature(func)
+          btypes = sig.bind_partial(*ty_args, **ty_kargs).arguments
+          # bind_partial 可以允许不同数量的参数进行匹配
+          def wrapper(*args, **kargs):
+              # for arg in d, isinstance(arg, d[arg]) 迭代字典类型匹配
+              for name, obj in sig.bind(*args, **kargs).arguments.items():
+                  if name in btypes:
+                      if not isinstance(obj, btypes[name]):
+                          raise TypeError('"%s" must be "%s"' % (obj, btypes[name]))
+              return func(*args, **kargs)
+          return wrapper
+      return decorator
+
+
+  @typeassert(int, str, int)
+  def f(a, b, c):
+      print(a, b, c)
+
+  f(1, 'abc', 2)
+  f(1, 2, 3)
+#+END_SRC
+
+关于signature的使用
+#+BEGIN_SRC python
+  In [9]: from inspect import signature
+
+  In [10]: def f(a, b, c=1): pass
+
+  In [11]: sig = signature(f)
+
+  In [12]: sig.parameters
+  Out[12]:
+  mappingproxy({'a': <Parameter "a">,
+                'b': <Parameter "b">,
+                'c': <Parameter "c=1">})
+
+  In [13]: a = sig.parameters['a']
+
+  In [14]: a.name
+  Out[14]: 'a'
+
+  In [15]: a.kind
+  Out[15]: <_ParameterKind.POSITIONAL_OR_KEYWORD: 1>
+
+  In [16]: a = sig.parameters['c']
+
+  In [17]: a.default
+  Out[17]: 1
+
+  In [18]: bargs = sig.bind(str, int, int)
+
+  In [19]: bargs.args
+  Out[19]: (str, int, int)
+
+  In [20]: bargs.arguments
+  Out[20]: OrderedDict([('a', str), ('b', int), ('c', int)])
+#+END_SRC
 * python 必须模块
 ** python必学模块-collections
 *** nametuple功能详解
@@ -1244,4 +1627,5 @@ extend方法传递一个可迭代对象，可以是list、tuple、set、只因�
 #+END_SRC
 *** 自定义元类
 ** python Socket编程
+*** socket client 实现通信
 

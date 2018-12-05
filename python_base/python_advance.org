@@ -1,5 +1,6 @@
 * python 高级编程实战练习
-** 数据结构和算法案例进阶训练
+** DONE 数据结构和算法案例进阶训练
+   CLOSED: [2018-12-03 Mon 21:01]
 *** 如何在列表，字典，集合中根据条件筛选数据？
  列表解析，filter，列表解析的速度是filter的一半左右，字典解析，集合解析
 *** 如何为元组中的每个元素命名，提高程序可读性。
@@ -16,7 +17,7 @@
 ** TODO 对象迭代与反迭代案例进阶训练
    DEADLINE: <2018-12-02 Sun 00:00>
 *** 如何实现可迭代对象和迭代器对象
-** TODO 字符串处理案例进阶训练
+** DONE 字符串处理案例进阶训练
 *** 如何拆分含多种分隔符的字符串
  案例：要把某个字符串依据分隔符拆分成不同的字段
  s = 'ab;cd|efg|hi,jkl|mn\topq;rst,uvw\txyz'
@@ -251,7 +252,6 @@ str.ljust, str.rjust, str.center
 
 #+END_SRC
 *** 如何去掉字符串中不需要的字符
-
 第一种 使用 strip
 #+BEGIN_SRC python
   In [65]: s = '   abc 123'
@@ -283,6 +283,12 @@ str.ljust, str.rjust, str.center
   Out[72]: 'abc'
 #+END_SRC
 第二种 使用切片 拼接的方式
+#+BEGIN_SRC python
+  In [82]: s = '123?4556'
+
+  In [84]: s[:3] + s[4:]
+  Out[84]: '1234556'
+#+END_SRC
 
 第三种：字符串replace方法， 或者使用正则表达式re.sub()删除任意字符
 #+BEGIN_SRC python
@@ -299,7 +305,7 @@ str.ljust, str.rjust, str.center
   In [80]: re.sub('[\t\r]', '', s)  # re.sub 可以替换多种字符
   Out[80]: 'abc123xyzopt'
 #+END_SRC
-** 文件I/O高效处理案例训练
+** TODO 文件I/O高效处理案例训练
 *** 如何读写文本文件
 **** python2 中读写字符串
 python2 中默认的str是二进制编码，支持中文的是unicode字符串
@@ -340,9 +346,9 @@ python3 中默认的str形式就是unicode形式，二进制形式用 b'abc' 且
 
   In [6]: f.close()
 #+END_SRC
-** 
 ** csv, json, xml, excel 高效解析案例进阶训练
-** 类与对象深度技术案例进阶训练
+** DONE 类与对象深度技术案例进阶训练
+   CLOSED: [2018-12-03 Mon 21:01]
 *** 如何派生内置不可变类型并修改其实例化行为？
  案例：我们想自定义一种新类型的元组，对于传入的可迭代对象，我们只保留其中的int类
  型且值大于0的元素，例如：IntTuple([1,-1,'abc',6,['x','y'],3])=>(1,6,3)
@@ -538,7 +544,7 @@ python3 中默认的str形式就是unicode形式，二进制形式用 b'abc' 且
    print(map(getArea, shapes))
  #+END_SRC
 ** 多线程编程核心技术案例进阶训练
-** 装饰器使用技巧案例进阶训练
+** TODO 装饰器使用技巧案例进阶训练
 *** 如何使用装饰器
 某些时候我们想为多个函数，统一添加某种功能，比如计时统计，记录日志，缓存计算等。
 我们不想在每个函数内一一添加完全相同的代码，这是就需要用到装饰器
@@ -700,6 +706,57 @@ f.__name__, f.__doc__, f.__moudle__...等。
   In [20]: bargs.arguments
   Out[20]: OrderedDict([('a', str), ('b', int), ('c', int)])
 #+END_SRC
+*** 如何实现属性可修改的函数装饰器
+实际案例：
+为分析程序内哪些函数执行实际开销较大，我们定义一个带有timeout的参数的函数装饰器。
+装饰功能如下：
+1、统计被装饰函数单次调用运行时间。
+2、时间大于参数timeout的,将此函数调用到记录log日志中
+3、运行时间可修改timeout的值
+
+解决方法：
+为包裹函数添加一个函数，用来修改闭包中使用的自由变量，在python3中使用nonlocal访
+问嵌套作用域中的变量引用
+#+BEGIN_SRC python
+  from random import randint
+
+  import time
+  import logging
+
+
+  def warn(timeout):
+      def decorator(func):
+          def wrapper(*args, **kargs):
+              start = time.time()
+              res = func(*args)
+              used = time.time() - start
+              if used > timeout:
+                  msg = '{}:{} > {}'.format(func.__name__, used, timeout)
+                  logging.warn(msg)
+              return res
+
+          def set_timeout(t):
+              nonlocal timeout
+              timeout = t
+          wrapper.set_timeout = set_timeout #给wrapper设置一个属性可以通过函数修改变量。
+          return wrapper
+      return decorator
+
+
+  @warn(1.5)
+  def test():
+      print('In test')
+      while randint(0, 1):
+          time.sleep(0.5)
+
+
+  for _ in range(30):
+      test()
+  test.set_timeout(1)
+  for _ in range(30):
+      test()
+#+END_SRC
+*** 
 * python 必须模块
 ** python必学模块-collections
 *** nametuple功能详解
@@ -765,7 +822,7 @@ f.__name__, f.__doc__, f.__moudle__...等。
    # [('g', 4), (' ', 4), ('a', 3)]
  #+END_SRC
 *** deque
-* python 高级编程和异步IO并发编程
+* TODO python 高级编程和异步IO并发编程
 ** python 一切皆对象
 *** python 一切皆对象
 **** 函数和类也是对象，属于python的一等公民

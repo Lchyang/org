@@ -1,0 +1,240 @@
+
+# Table of Contents
+
+1.  [装饰器使用技巧案例进阶训练](#org8fc9bf6)
+    1.  [如何使用装饰器](#org9ce7daa)
+    2.  [如何为被装饰的函数保存元数据](#org8491599)
+    3.  [如何定义带参数装饰器](#orga7cc73a)
+    4.  [如何实现属性可修改的函数装饰器](#org309fe54)
+
+
+<a id="org8fc9bf6"></a>
+
+# 装饰器使用技巧案例进阶训练
+
+
+<a id="org9ce7daa"></a>
+
+## 如何使用装饰器
+
+某些时候我们想为多个函数，统一添加某种功能，比如计时统计，记录日志，缓存计算等。
+我们不想在每个函数内一一添加完全相同的代码，这是就需要用到装饰器
+
+比如为了解决斐波那契数列重复调用的问题，给函数增加缓存。
+
+    def memo(func):
+        cache = {}
+    
+        def wrap(*args):
+            if args not in cache:
+                cache[args] = func(*args)
+            return cache[args]
+        return wrap
+    
+    
+    @memo
+    def fibonacci(n):
+        if n <= 1:
+            return 1
+        return fibonacci(n-1) + fibonacci(n-2)
+    
+    
+    @memo
+    def climb(n, steps):
+        count = 0
+        if n == 0:
+            count = 1
+        elif n > 0:
+            for step in steps:
+                count += climb(n - step, steps)
+        return count
+
+
+<a id="org8491599"></a>
+
+## 如何为被装饰的函数保存元数据
+
+在函数对象中保存着一些函数的元数据，例如： 
+f.\_<sub>name</sub>\_\_, f.\_<sub>doc</sub>\_\_, f.\_<sub>moudle</sub>\_<sub>&#x2026;等</sub>。
+在我们使用装饰器后，再使用上面这些属性访问时，看到的是内部包裹函数的元数据，原
+理的函数的元数据便丢失了。
+
+    def mydecorator(func):
+        def wrapper(*args, **kargs):
+            '''wrapper function'''
+            print('In wrapper')
+            func(*args, **kargs)
+        return wrapper
+    
+    
+    @mydecorator
+    def example():
+        '''example function'''
+        print('in example')
+    
+    
+    print(example.__name__)
+    print(example.__doc__)
+    
+    # In [44]: example  没有装饰器的结果
+    # example function
+    
+    # In [45]: wrapper  有装饰器的结果
+    # wrapper function
+
+如何解决
+
+    from functools import update_wrapper, wraps
+    
+    
+    @wraps #使用update_wrapper 可以解决这个问题，wrap是update_wrapper的快捷函数同样可以.
+    def mydecorator(func):
+        def wrapper(*args, **kargs):
+            '''wrapper function'''
+            print('In wrapper')
+            func(*args, **kargs)
+        # update_wrapper(wrapper, func)
+        return wrapper
+    
+    
+    @mydecorator
+    def example():
+        '''example function'''
+        print('in example')
+    
+    
+    print(example.__name__)
+    print(example.__doc__)
+    
+    # In [46]: example 
+    # example function
+
+
+<a id="orga7cc73a"></a>
+
+## 如何定义带参数装饰器
+
+实现一个装饰器，它用来检查被装饰函数的参数的类型。装饰器可以通过参数指明函数参
+数类型，调用时如果检测出类型不匹配这抛出异常。
+解决办法：
+提取函数的签名：inspect.signature()
+带参数的装饰器，依旧是根据参数定制化一个装饰器，可以看成生成生成器的工厂，每次
+调用typeassert，返回一个特定的装饰器，然后用它装饰其他函数。
+
+    from inspect import signature
+    
+    
+    def typeassert(*ty_args, **ty_kargs):
+        def decorator(func):
+            # fnc -> a, b  需要知道函数有哪些参数
+            # d = {'a': int, 'b', str} 通过函数参数和传入的类型构造字典()
+            sig = signature(func)
+            btypes = sig.bind_partial(*ty_args, **ty_kargs).arguments
+            # bind_partial 可以允许不同数量的参数进行匹配
+            def wrapper(*args, **kargs):
+                # for arg in d, isinstance(arg, d[arg]) 迭代字典类型匹配
+                for name, obj in sig.bind(*args, **kargs).arguments.items():
+                    if name in btypes:
+                        if not isinstance(obj, btypes[name]):
+                            raise TypeError('"%s" must be "%s"' % (obj, btypes[name]))
+                return func(*args, **kargs)
+            return wrapper
+        return decorator
+    
+    
+    @typeassert(int, str, int)
+    def f(a, b, c):
+        print(a, b, c)
+    
+    f(1, 'abc', 2)
+    f(1, 2, 3)
+
+关于signature的使用
+
+    In [9]: from inspect import signature
+    
+    In [10]: def f(a, b, c=1): pass
+    
+    In [11]: sig = signature(f)
+    
+    In [12]: sig.parameters
+    Out[12]:
+    mappingproxy({'a': <Parameter "a">,
+                  'b': <Parameter "b">,
+                  'c': <Parameter "c=1">})
+    
+    In [13]: a = sig.parameters['a']
+    
+    In [14]: a.name
+    Out[14]: 'a'
+    
+    In [15]: a.kind
+    Out[15]: <_ParameterKind.POSITIONAL_OR_KEYWORD: 1>
+    
+    In [16]: a = sig.parameters['c']
+    
+    In [17]: a.default
+    Out[17]: 1
+    
+    In [18]: bargs = sig.bind(str, int, int)
+    
+    In [19]: bargs.args
+    Out[19]: (str, int, int)
+    
+    In [20]: bargs.arguments
+    Out[20]: OrderedDict([('a', str), ('b', int), ('c', int)])
+
+
+<a id="org309fe54"></a>
+
+## 如何实现属性可修改的函数装饰器
+
+实际案例：
+为分析程序内哪些函数执行实际开销较大，我们定义一个带有timeout的参数的函数装饰器。
+装饰功能如下：
+1、统计被装饰函数单次调用运行时间。
+2、时间大于参数timeout的,将此函数调用到记录log日志中
+3、运行时间可修改timeout的值
+
+解决方法：
+为包裹函数添加一个函数，用来修改闭包中使用的自由变量，在python3中使用nonlocal访
+问嵌套作用域中的变量引用
+
+    from random import randint
+    
+    import time
+    import logging
+    
+    
+    def warn(timeout):
+        def decorator(func):
+            def wrapper(*args, **kargs):
+                start = time.time()
+                res = func(*args)
+                used = time.time() - start
+                if used > timeout:
+                    msg = '{}:{} > {}'.format(func.__name__, used, timeout)
+                    logging.warn(msg)
+                return res
+    
+            def set_timeout(t):
+                nonlocal timeout
+                timeout = t
+            wrapper.set_timeout = set_timeout #给wrapper设置一个属性可以通过函数修改变量。
+            return wrapper
+        return decorator
+    
+    
+    @warn(1.5)
+    def test():
+        print('In test')
+        while randint(0, 1):
+            time.sleep(0.5)
+    
+    
+    for _ in range(30):
+        test()
+    test.set_timeout(1)
+    for _ in range(30):
+        test()
+

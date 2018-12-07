@@ -543,7 +543,321 @@ python3 中默认的str形式就是unicode形式，二进制形式用 b'abc' 且
    shapes = [shape1, shape2, shape3]
    print(map(getArea, shapes))
  #+END_SRC
-** 多线程编程核心技术案例进阶训练
+** TODO 多线程编程核心技术案例进阶训练
+*** 如何使用多线程
+#+BEGIN_SRC python
+  import csv
+  from xml.etree.ElementTree import ElementTree, Element
+  import requests
+  from StringIO import StringIO
+  from xml_pretty import pretty
+
+
+  # 下载函数
+  def download(url):
+      response = requests.get(url, timeout=3)
+      if response.ok:
+          return StringIO(response.content)
+
+
+  # csv 转换成 xml
+  def csvToXml(scsv, fxml):
+      reader = csv.reader(scsv)
+      headers = reader.next()
+      headers = map(lambda h: h.replace(' ', ''), headers)
+
+      root = Element('Data')
+      for row in reader:
+          eRow = Element('Row')
+          root.append(eRow)
+          for tag, text in zip(headers, row):
+              e = Element(tag)
+              e.text = text
+              eRow.append(e)
+
+      pretty(root)
+      et = ElementTree(root)
+      et.write(fxml)
+
+
+  def handle(sid):
+      print('Download...(%d)' % sid)
+      url = 'http://table.finace.yahoo.com/table.csv?s=%s.sz'
+      url = url % str(sid).rjust(6, '0')
+      rf = download(url)
+      if rf is None:
+          return
+
+      print ('Convert to XML..(%d') % sid
+      fname = str(sid).rjust(6, '0') + '.xml'
+      with open(fname, 'wb') as wf:
+          csvToXml(rf, wf)
+
+
+  from threading import Thread
+  '''
+  # 使用线程的第一种方法 target指定线程运行的函数， args传递函数参数（元组)
+  t = Thread(target=handle, args=(1,))
+  t.start()
+  print ('main thread')
+  '''
+  # 使用类
+
+  class MyThread(Thread):
+      def __init__(self, sid):
+          Thread.__init__(self)
+          self.sid = sid
+
+      def run(self):
+          handle(self.sid)
+
+  threads = []
+  for i in range(1, 11):
+      t = MyThread(i)
+      threads.append(t)
+      t.start()
+
+  for t in threads:
+      t.join()
+
+  # t.join() # 阻塞函数 当子进程结束后返回这个值
+  print('main thread')
+#+END_SRC
+*** 如何线程间的通信
+    在多个线程中每个线程可以访问全局变量，在全局变量中定义一个queue进行通信。 
+#+BEGIN_SRC python
+  import csv
+  from xml.etree.ElementTree import ElementTree, Element
+  import requests
+  from StringIO import StringIO
+  from xml_pretty import pretty
+  from threading import Thread
+  from Queue import Queue # collections 中的deque 不是线程安全的
+
+
+  class DownloadThread(Thread):
+      def __init__(self, sid, queue):
+          Thread.__init__(self)
+          self.sid = sid
+          url = 'http://table.finace.yahoo.com/table.csv?s=%s.sz'
+          url = url % str(sid).rjust(6, '0')
+          self.queue = queue
+
+      def download(self, url):
+          response = requests.get(url, timeout=3)
+          if response.ok:
+              return StringIO(response.content)
+
+      def run(self):
+          data = self.download(self.url)
+          self.queue.put((self.sid, data)) #使用队列完成线程通信
+
+
+  class ConvertThread(Thread):
+      def __init__(self, queue):
+          Thread.__init__(self)
+          self.queue = queue
+
+      # csv 转换成 xml
+      def csvToXml(self, scsv, fxml):
+          reader = csv.reader(scsv)
+          headers = reader.next()
+          headers = map(lambda h: h.replace(' ', ''), headers)
+
+          root = Element('Data')
+          for row in reader:
+              eRow = Element('Row')
+              root.append(eRow)
+              for tag, text in zip(headers, row):
+                  e = Element(tag)
+                  e.text = text
+                  eRow.append(e)
+
+          pretty(root)
+          et = ElementTree(root)
+          et.write(fxml)
+
+      def run(self):
+          while True:
+              sid, data = self.queue.get()
+              if sid == -1:
+                  break
+              if data:
+                  fname = str(sid).rjust(6, '0') + '.xml'
+                  with open(fname, 'wb') as wf:
+                      self.csvToXml(data, wf)
+
+
+  q = Queue()
+  dThreads = [DownloadThread(i, q) for i in range(1, 11)]
+  cThread = ConvertThread(q)
+  for t in dThreads:
+      t.start()
+  cThread.start()
+
+
+  for t in dThreads:
+      t.join()
+
+  q.put(-1, None)
+#+END_SRC
+*** 如何在线程进行事件通知
+打包程序
+#+BEGIN_SRC python
+  import tarfile
+  import os
+
+
+  def tarXML(tfname):
+      tf = tarfile.open(tfname, 'w:gz') # w是写模式 gz压缩算法
+      for fname in os.listdir('.'):     # 遍历当前目录下的文件
+          if fname.endswith('.xml'):    # 判断是否.xml结尾
+              tf.add(fname)             # 如果是将它打包
+              os.remove(fname)          # 然后删除该xml文件
+      tf.close()
+
+      if not tf.members:
+          os.remove(tfname)
+
+
+  tarXML('test.tgz')
+#+END_SRC
+
+实现一个线程，将转换出的xml文件压缩打包，比如转换线程每生成100个xml文件，就通知
+打包线程将塔曼打包成一个xxx.tgz文件，并删除xml文件，打包完成后，打包线程反过来
+通知转换线程，转换线程继续转换。
+使用标准库中的Threading.Event
+1.等待一端用wait，等待通知
+2.通知一端用set，通知事件
+
+#+BEGIN_SRC python
+  import csv
+  from xml.etree.ElementTree import ElementTree, Element
+  import requests
+  from io import StringIO
+  from xml_pretty import pretty
+  from threading import Thread, Event
+  from Queue import Queue      # collections 中的deque 不是线程安全的
+  import tarfile
+  import os
+
+
+  class DownloadThread(Thread):
+      def __init__(self, sid, queue):
+          Thread.__init__(self)
+          self.sid = sid
+          url = 'http://table.finace.yahoo.com/table.csv?s=%s.sz'
+          url = url % str(sid).rjust(6, '0')
+          self.queue = queue
+
+      def download(self, url):
+          response = requests.get(url, timeout=3)
+          if response.ok:
+              return StringIO(response.content)
+
+      def run(self):
+          data = self.download(self.url)
+          self.queue.put((self.sid, data))     # 使用队列完成线程通信
+
+
+  class ConvertThread(Thread):
+      def __init__(self, queue, cEvent, tEvent):
+          Thread.__init__(self)
+          self.queue = queue
+          self.cEvent = cEvent    # 转换事件
+          self.tEvent = tEvent    # 打包事件
+
+      # csv 转换成 xml
+      def csvToXml(self, scsv, fxml):
+          reader = csv.reader(scsv)
+          headers = reader.next()
+          headers = map(lambda h: h.replace(' ', ''), headers)
+
+          root = Element('Data')
+          for row in reader:
+              eRow = Element('Row')
+              root.append(eRow)
+              for tag, text in zip(headers, row):
+                  e = Element(tag)
+                  e.text = text
+                  eRow.append(e)
+
+          pretty(root)
+          et = ElementTree(root)
+          et.write(fxml)
+
+      def run(self):
+          count = 0     # 引用计数
+          while True:
+              sid, data = self.queue.get()
+              if sid == -1:
+                  self.cEvent.set()  # 结束时发送转换完成事务
+                  self.tEvent.wait()
+                  break
+              if data:
+                  fname = str(sid).rjust(6, '0') + '.xml'
+                  with open(fname, 'wb') as wf:
+                      self.csvToXml(data, wf)
+                  count += 1
+                  if count == 5:
+                      self.cEvent.set()  # 发送转换完成事务
+
+                      self.tEvent.wait()   # 等待打包完成事务
+                      self.tEvent.clear()
+                      count = 0
+
+
+  class TarThread(Thread):
+      def __init__(self, cEvent, tEvent):
+          Thread.__init__(self)
+          self.count = 0
+          self.cEvent = cEvent    # 转换事件
+          self.tEvent = tEvent    # 打包事件
+          self.setDaemon(True)    # 守护线程 其他线程结束后自动退出
+
+      def tarXML(self):
+          self.count += 1
+          tfname = '%d.tgz' % self.count
+          tf = tarfile.open(tfname, 'w:gz')
+          for fname in os.listdir('.'):
+              if fname.endswith('.xml'):
+                  tf.add(fname)
+                  os.remove(fname)
+          tf.close()
+
+          if not tf.members:
+              os.remove(tfname)
+
+      def run(self):
+          while True:
+              self.cEvent.wait()    # 等待转换事件完成通知
+              self.tarXML()         # 开始打包
+              self.cEvent.clear()   # 清空事务消息
+
+              self.tEvent.set()     # 发送打包完成事务消息
+
+
+  if __name__ == '__main__':
+      q = Queue()
+      dThreads = [DownloadThread(i, q) for i in range(1, 11)]
+
+      cEvent = Event()
+      tEvent = Event()
+
+      cThread = ConvertThread(q, cEvent, tEvent)
+      tThread = TarThread(cEvent, tEvent)
+      tThread.satrt()
+
+      for t in dThreads:
+          t.start()
+      cThread.start()
+
+      for t in dThreads:
+          t.join()
+
+      q.put(-1, None)
+
+#+END_SRC
 ** TODO 装饰器使用技巧案例进阶训练
 *** 如何使用装饰器
 某些时候我们想为多个函数，统一添加某种功能，比如计时统计，记录日志，缓存计算等。

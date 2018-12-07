@@ -1,12 +1,7 @@
-* 计算机通用基础 
-** 数据结构与算法和刷 lintcode 重要度 *****                       买一本书梳理知识体系用 lintcode 用作练
-** c 语言与计算机系统基础 编程基础 重要度 *****
-*** The c programming language 
-*** 中国大学慕课是的视频课程
-** 计算机网络
 * python web 开发 
 ** 数据库
-** 计算机网络
+** tcp/ip
+** 数据结构，算法
 ** python 语言
 ** linux系统
 *** ln

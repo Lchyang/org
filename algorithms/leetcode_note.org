@@ -438,8 +438,6 @@ class Solution:
             return t1
         if t2:
             return t2
-        
-
 #+END_SRC
 *** Maximum Depth of Binary Tree
 Given a binary tree, find its maximum depth.

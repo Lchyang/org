@@ -9,7 +9,7 @@
  用字典dict.fromkeys(data,0)创建字典，然后迭代每个key出现value加一
  collections 中 Counter 和 counter.most_common
 *** 如何快速找到多个字典中的公共key？
- reduce(lambda a,b: a&b, map(dict.keys(),[data1, data2, data3]))
+    reduce(lambda a,b: a&b, map(dict.keys(),[data1, data2, data3]))
 *** 如何让字典保持有序？
  collections 中 OrderedDict
 *** 如何实现用户历史记录功能？
@@ -1070,7 +1070,6 @@ f.__name__, f.__doc__, f.__moudle__...等。
   for _ in range(30):
       test()
 #+END_SRC
-*** 
 * python 必须模块
 ** python必学模块-collections
 *** nametuple功能详解

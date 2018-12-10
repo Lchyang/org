@@ -1,5 +1,307 @@
 * python web 开发 
 ** 数据库
+*** 启动/关闭mysql服务 
+*** 修改mysql提示符
+使用 promapt
+\D 完整的日期
+\d 当前数据库
+\h 服务器名称
+\u 当前的用户
+prompt \u@\h \d>
+*** mysql 常用命令及语法规范
+SELECT USER();
+SELECT VERSION();
+SELECT NOW();
+- 关键字与函数名称全部大写
+- 数据库名称、表名称、字段名称小写
+- sql语句必须以分号结尾
+*** 操作数据库
+**** 创建数据库
+CREATE {DATABASE | SCHEMA} [IF NOT EXISTS] db_name [DEFAULT]
+CHARACTER SET [=] charest_name
+{}里面是必填 []是选填
+CREATE DATABASE t1;
+CREATE DATABASE IF NOT EXISTS t1; 这是不会报错会产生警告。
+SHOW WARNINGS; 查看警告
+CHARACTER SET 表示创建数据库使用的编码格式
+CREATE DATABASE IF NOT EXISTS t2 CHARACTER SET gbk;
+**** 修改数据库
+ALTER {DATABASE | SCHEMA} [db_name] [DEFAULT] CHARACTER SET [=] charset_name
+ALTER DATABASE t2 CHARACTER SET = utf8; 修改数据库的编码格式
+SHOW CREATE DATABASE t2;  查看数据库的编码格式
+**** 删除数据库
+DROP {DATABASE | SCHEMA} [IF EXISTS] db_name
+*** 数据类型
+数据类型是指列、存储过程参数、表达式和局部变量的数据特征，他决定了数据的存储格
+式，代表了不同的信息类型
+**** 整型
+TINYINT  一个字节 0-255
+SMALLINT 两个字节 0-65535
+MEDIUMINT 三个字节 0-16777215
+INT      四个字节 0-2**32-1
+BIGINT   八个字节 0-2**64-1
+**** 浮点型
+FLOAT[(M,D)] M是数字总位数，D是小数点后边的位数。如果省略则根据硬件限制量保存值。
+DOUBLE[(M,D)]
+**** 日期时间型
+YEAR
+TIME
+DATE
+DATETIME
+TIMESTAMP
+**** 字符型
+MySQL数据类型	含义
+char(n)	固定长度，最多255个字符
+varchar(n)	固定长度，最多65535个字符
+tinytext	可变长度，最多255个字符
+text	可变长度，最多65535个字符
+mediumtext	可变长度，最多2的24次方-1个字符
+longtext	可变长度，最多2的32次方-1个字符
+
+char和varchar：
+1.char(n) 若存入字符数小于n，则以空格补于其后，查询之时再将空格去掉。所以char类
+型存储的字符串末尾不能有空格，varchar不限于此。
+2.char(n) 固定长度，char(4)不管是存入几个字符，都将占用4个字节，varchar是存入的
+实际字符数+1个字节（n<=255）或2个字节(n>255)，所以varchar(4),存入3个字符将占用4个字节。 
+3.char类型的字符串检索速度要比varchar类型的快。
+
+varchar和text： 
+1.varchar可指定n，text不能指定，内部存储varchar是存入的实际字符数+1个字节
+（n<=255）或2个字节(n>255)，text是实际字符数+2个字节。 
+2.text类型不能有默认值。 
+3.varchar可直接创建索引，text创建索引要指定前多少个字符。varchar查询速度快于
+text,在都创建索引的情况下，text的索引似乎不起作用。
+**** 枚举型
+ENUM('value1','value2',...)
+**** set
+SET('value1','value2',...) 最多64个成员，做所有成员的排列组合。
+*** 操作数据表
+打开数据库 USE databasename;
+SELECT DATABASE(); 显示当前打开数据库
+**** 创建数据表
+CREATE TABLE [IF NOT EXISTS] table_name(
+   column_name data_type,
+   ...
+);
+
+CREATE TABLE tb1( 
+username VARCHAR(20), 
+age TINYINT UNSIGNED, 
+salary FLOAT(8,2) UNSIGNED
+);
+**** 查看数据表
+SHOW TABLES [FROM db_name] [LIKE 'pattern' | WHERE expr]
+
+SHOW TABLES; 查看当前数据库中的表
+SHOW TABLES FROM mysql; 查看其它数据库中的表
+**** 查看数据表的结构 
+SHOW COLUMNS FROM tbl_name;
+SHOW COLUMNS FROM tb1; 查看 tb1 表的结构
+
+root@localhost test>SHOW COLUMNS FROM tb1;
++----------+---------------------+------+-----+---------+-------+
+| Field    | Type                | Null | Key | Default | Extra |
++----------+---------------------+------+-----+---------+-------+
+| username | varchar(20)         | YES  |     | NULL    |       |
+| age      | tinyint(3) unsigned | YES  |     | NULL    |       |
+| salary   | float(8,2) unsigned | YES  |     | NULL    |       |
++----------+---------------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+**** mysql 记录的插入与查找
+***** 插入记录
+INSERT [INFO] tbl_name [(col_name,..)] VALUES (val,..)
+
+root@localhost test>INSERT tb1 VALUES('tom',25,342.23);
+Query OK, 1 row affected (0.01 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb1;
++----------+---------------------+------+-----+---------+-------+
+| Field    | Type                | Null | Key | Default | Extra |
++----------+---------------------+------+-----+---------+-------+
+| username | varchar(20)         | YES  |     | NULL    |       |
+| age      | tinyint(3) unsigned | YES  |     | NULL    |       |
+| salary   | float(8,2) unsigned | YES  |     | NULL    |       |
++----------+---------------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+root@localhost test>INSERT tb1(username, salary) VALUES('john', 450.23);
+Query OK, 1 row affected (0.01 sec)
+***** 记录的查找
+SELECT expr,.. FROM tabl_name;
+
+root@localhost test>SELECT * FROM tb1;
++----------+------+--------+
+| username | age  | salary |
++----------+------+--------+
+| tom      |   25 | 342.23 |
+| john     | NULL | 450.23 |
++----------+------+--------+
+2 rows in set (0.00 sec)
+**** mysql 的空值与非空
+NULL, 字段值可以为空
+NOT NULL, 字段值禁止为空
+
+root@localhost test>CREATE TABLE tb2(
+    -> username VARCHAR(20) NOT NULL,
+    -> age TINYINT UNSIGNED NULL
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb2;
++----------+---------------------+------+-----+---------+-------+
+| Field    | Type                | Null | Key | Default | Extra |
++----------+---------------------+------+-----+---------+-------+
+| username | varchar(20)         | NO   |     | NULL    |       |
+| age      | tinyint(3) unsigned | YES  |     | NULL    |       |
++----------+---------------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+root@localhost test>INSERT tb2 VALUES('tom', NULL);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>SELECT * FROM tb2;
++----------+------+
+| username | age  |
++----------+------+
+| tom      | NULL |
++----------+------+
+1 row in set (0.00 sec)
+
+root@localhost test>INSERT tb2 VALUES(NULL, 22);
+ERROR 1048 (23000): Column 'username' cannot be null
+**** mysql 自动编号（AUTO_INCREMENT)
+自动编号，必须和主键组合使用
+默认情况下，起始值为1， 每次增量为1
+AUTO_INCREMENT 必须和主键一起使用，主键不必须有 AUTO_INCREMENT
+**** 主键约束
+每张表只能存在一个主键
+主键保证记录的唯一性
+主键自动为NOT NULL
+
+root@localhost test>CREATE TABLE tb3(
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT KEY,
+    -> username VARCHAR(30) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb3;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(30)          | NO   |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+2 rows in set (0.01 sec)
+
+root@localhost test>INSERT tb3(username) VALUES('tom');
+Query OK, 1 row affected (0.01 sec)
+
+root@localhost test>INSERT tb3(username) VALUES('john');
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>INSERT tb3(username) VALUES('bob');
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>SELECT * FROM tb3;
++----+----------+
+| id | username |
++----+----------+
+|  1 | tom      |
+|  2 | john     |
+|  3 | bob      |
++----+----------+
+3 rows in set (0.00 sec)
+
+如果没有AUTO_INCREMENT 主键得手动赋值。
+
+root@localhost test>CREATE TABLE tb4(
+    -> id SMALLINT UNSIGNED KEY,
+    -> username VARCHAR(20) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb4;
++----------+----------------------+------+-----+---------+-------+
+| Field    | Type                 | Null | Key | Default | Extra |
++----------+----------------------+------+-----+---------+-------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    |       |
+| username | varchar(20)          | NO   |     | NULL    |       |
++----------+----------------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+root@localhost test>INSERT tb4(username) VALUES('tom');
+ERROR 1364 (HY000): Field 'id' doesn't have a default value
+root@localhost test>INSERT tb4 VALUES(2,'tom');
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>INSERT tb4 VALUES(4,'tom');
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>SELECT * FROM tb4;
++----+----------+
+| id | username |
++----+----------+
+|  2 | tom      |
+|  4 | tom      |
++----+----------+
+2 rows in set (0.00 sec)
+**** mysql 初涉唯一约束
+唯一约束可以保证记录的唯一性
+唯一约束的字段可以为空值（NULL）
+每张数据表可以存在多个唯一约束
+
+root@localhost test>CREATE TABLE tb5( 
+id SMALLINT UNSIGNED AUTO_INCREMENT KEY, 
+username VARCHAR(20) NOT NULL UNIQUE KEY, 
+age TINYINT UNSIGNED);
+Query OK, 0 rows affected (0.02 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb5;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   | UNI | NULL    |                |
+| age      | tinyint(3) unsigned  | YES  |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+root@localhost test>INSERT tb5(username,age) VALUES('Tom',22);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>INSERT tb5(username,age) VALUES('Tom',22);
+ERROR 1062 (23000): Duplicate entry 'Tom' for key 'username'
+唯一约束，字段的key不可以重复
+**** 初涉默认约束
+当插入记录时，如果没有明确的字段赋值，则自动赋予默认值。 
+root@localhost test>CREATE TABLE tb6(
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT KEY,
+    -> username VARCHAR(20) NOT NULL UNIQUE KEY,
+    -> sex ENUM('1','2','3') DEFAULT '3'
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+root@localhost test>SHOW COLUMNS FROM tb6;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   | UNI | NULL    |                |
+| sex      | enum('1','2','3')    | YES  |     | 3       |                |
++----------+----------------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+root@localhost test>INSERT tb6(username) VALUES('Tom');
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>SELECT * FROM tb6;
++----+----------+------+
+| id | username | sex  |
++----+----------+------+
+|  1 | Tom      | 3    |
++----+----------+------+
+1 row in set (0.00 sec)
+
 ** tcp/ip
 ** 数据结构，算法
 ** python 语言

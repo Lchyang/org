@@ -2,7 +2,7 @@
 ** 数据库
 *** 启动/关闭mysql服务 
 *** 修改mysql提示符
-使用 promapt
+使用 prompt
 \D 完整的日期
 \d 当前数据库
 \h 服务器名称
@@ -15,7 +15,7 @@ SELECT NOW();
 - 关键字与函数名称全部大写
 - 数据库名称、表名称、字段名称小写
 - sql语句必须以分号结尾
-*** 操作数据库
+*** 操作数据库(数据库的增删改查)
 **** 创建数据库
 CREATE {DATABASE | SCHEMA} [IF NOT EXISTS] db_name [DEFAULT]
 CHARACTER SET [=] charest_name
@@ -301,6 +301,613 @@ root@localhost test>SELECT * FROM tb6;
 |  1 | Tom      | 3    |
 +----+----------+------+
 1 row in set (0.00 sec)
+*** 约束以及修改数据表(表结构的修改)
+**** 外键约束的要求
+1.父表和子表必须使用相同的存储引擎，而且禁止使用临时表。
+2.数据表的存储引擎只能为InnoDB
+3.外键列和参照列必须具有相似的数据类型。其中数字的长度和是否有符号位必须相同；而
+字符长度则可以不同。
+4.外键列和参照列必须创建索引。如果外键列不存在索引的话，mysql将自动创建索引。
+
+root@localhost test>CREATE TABLE provinces( 
+id SMALLINT UNSIGNED KEY AUTO_INCREMENT,
+ pname VARCHAR(20) NOT NULL);
+Query OK, 0 rows affected (0.03 sec)
+
+root@localhost test>CREATE TABLE users(
+    -> id SMALLINT UNSIGNED KEY AUTO_INCREMENT,
+    -> username VARCHAR(10) NOT NULL,
+    -> pid SMALLINT UNSIGNED,
+    -> FOREIGN KEY (pid) REFERENCES provinces(id)
+    -> );
+
+***** mysql 配置文件
+default-storage-engine = INNODB
+
+**** 外键约束的参照操作
+1、CASCADE:从父表中删除或更新且自动删除或更新字表中匹配的行
+2、SET NULL: 从附表删除或更新行，并设置字表的外键列为NULL。
+如果使用该选项，必须保证字表列中没有指定的NOT NULL
+3、RESTRICT: 拒绝父表的删除后更新操作
+4、NO ACTION: 标准sql关键字，在mysql中与RESTRICT相同。
+
+**** 表级约束与列级约束
+**** 修改数据表 ***** 
+***** 添加数据表
+ALTER TABLES tbl_name ADD [COLUMN] col_name column_definition
+[FIRST | AFTER col_name]
+
+root@localhost test>SHOW COLUMNS FROM users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(10)          | NO   |     | NULL    |                |
+| pid      | smallint(5) unsigned | YES  | MUL | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+root@localhost test>ALTER TABLE users ADD age TINYINT UNSIGNED NOT NULL DEFAULT 10;
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(10)          | NO   |     | NULL    |                |
+| pid      | smallint(5) unsigned | YES  | MUL | NULL    |                |
+| age      | tinyint(3) unsigned  | NO   |     | 10      |                |
++----------+----------------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+root@localhost test>ALTER TABLE users ADD password VARCHAR(32) NOT NULL AFTER username;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(10)          | NO   |     | NULL    |                |
+| password | varchar(32)          | NO   |     | NULL    |                |
+| pid      | smallint(5) unsigned | YES  | MUL | NULL    |                |
+| age      | tinyint(3) unsigned  | NO   |     | 10      |                |
++----------+----------------------+------+-----+---------+----------------+
+5 rows in set (0.01 sec)
+***** 添加多列
+ALTER TABLE tbl_name ADD [COLUMN] (col_name column_definition,...)
+***** 删除列
+ALTER TABLE tbl_name DROP [COLUMN] col_name
+
+root@localhost test>SHOW COLUMNS FROM users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(10)          | NO   |     | NULL    |                |
+| password | varchar(32)          | NO   |     | NULL    |                |
+| pid      | smallint(5) unsigned | YES  | MUL | NULL    |                |
+| age      | tinyint(3) unsigned  | NO   |     | 10      |                |
++----------+----------------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+root@localhost test>ALTER TABLE users DROP age;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(10)          | NO   |     | NULL    |                |
+| password | varchar(32)          | NO   |     | NULL    |                |
+| pid      | smallint(5) unsigned | YES  | MUL | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+root@localhost test>ALTER TABLE users DROP username, DROP password;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users;
++-------+----------------------+------+-----+---------+----------------+
+| Field | Type                 | Null | Key | Default | Extra          |
++-------+----------------------+------+-----+---------+----------------+
+| id    | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| pid   | smallint(5) unsigned | YES  | MUL | NULL    |                |
++-------+----------------------+------+-----+---------+----------------+
+2 rows in set (0.01 sec)
+**** 添加主键
+ALTER TABLE tbl_name ADD [CONSTRAINT] PRIMARY KEY [index_type] (index_col_name,
+...)
+
+
+root@localhost test>CREATE TABLE users2(
+    -> username VARCHAR(10) NOT NULL,
+    -> pid SMALLINT UNSIGNED
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+root@localhost test>SHOW CREATE TABLE users2;
++--------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                              |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| users2 | CREATE TABLE `users2` (
+  `username` varchar(10) NOT NULL,
+  `pid` smallint(5) unsigned DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.01 sec)
+
+root@localhost test>ALTER TABLE user2 ADD id smallint unsigned;
+ERROR 1146 (42S02): Table 'test.user2' doesn't exist
+root@localhost test>ALTER TABLE users2 ADD id smallint unsigned;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users2;
++----------+----------------------+------+-----+---------+-------+
+| Field    | Type                 | Null | Key | Default | Extra |
++----------+----------------------+------+-----+---------+-------+
+| username | varchar(10)          | NO   |     | NULL    |       |
+| pid      | smallint(5) unsigned | YES  |     | NULL    |       |
+| id       | smallint(5) unsigned | YES  |     | NULL    |       |
++----------+----------------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+root@localhost test>ALTER TABLE users2 ADD CONSTRAINT PK_users2_id PRIMARY KEY (id);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW COLUMNS FROM users2;
++----------+----------------------+------+-----+---------+-------+
+| Field    | Type                 | Null | Key | Default | Extra |
++----------+----------------------+------+-----+---------+-------+
+| username | varchar(10)          | NO   |     | NULL    |       |
+| pid      | smallint(5) unsigned | YES  |     | NULL    |       |
+| id       | smallint(5) unsigned | NO   | PRI | NULL    |       |
++----------+----------------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+**** 添加唯一约束
+ALTER TABLE tbl_name ADD [CONSTRAINT [symbol]] UNIQUE [INDEX|KEY] [index_name]
+[index_type] (index_col_name,...)
+
+root@localhost test>ALTER TABLE users2 ADD UNIQUE(username);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+root@localhost test>SHOW CREATE TABLE users2;
++--------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                                                                                                                                |
++--------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| users2 | CREATE TABLE `users2` (
+  `username` varchar(10) NOT NULL,
+  `pid` smallint(5) unsigned DEFAULT NULL,
+  `id` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
++--------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+root@localhost test>SHOW COLUMNS FROM users2;
++----------+----------------------+------+-----+---------+-------+
+| Field    | Type                 | Null | Key | Default | Extra |
++----------+----------------------+------+-----+---------+-------+
+| username | varchar(10)          | NO   | UNI | NULL    |       |
+| pid      | smallint(5) unsigned | YES  |     | NULL    |       |
+| id       | smallint(5) unsigned | NO   | PRI | NULL    |       |
++----------+----------------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+**** 添加外键约束
+ALTET TABLE tbl_name ADD [CONSTRAINT [symbol]] FOREIGN KEY [index_name]
+(index_col_name,...) reference_definition
+**** 添加删除默认约束
+ALTER TABLE tbl_name ALTER [COLUMN] col_name {SET DEFAULT literal | DROP
+DEFAULT }
+**** 删除约束
+**** 修改列定义和更名数据表
+*** 操作数据表中的记录(记录的增删改查)
+**** 插入记录
+INSERT [INTO] tbl_name [(col_name,..)] {VALUES | VALUE}
+({expr | DEFAULT},...),(...),...
+
+root@localhost test>CREATE TABLE users(
+    -> id smallint unsigned key auto_increment,
+    -> username varchar(20) not null,
+    -> password varchar(32) not null,
+    -> age tinyint unsigned not null default 10,
+    -> sex boolean
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+root@localhost test>show columns from users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   |     | NULL    |                |
+| password | varchar(32)          | NO   |     | NULL    |                |
+| age      | tinyint(3) unsigned  | NO   |     | 10      |                |
+| sex      | tinyint(1)           | YES  |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+root@localhost test>insert users values(null,'Tom','123',15,1);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>select * from users;
++----+----------+----------+-----+------+
+| id | username | password | age | sex  |
++----+----------+----------+-----+------+
+|  1 | Tom      | 123      |  15 |    1 |
++----+----------+----------+-----+------+
+1 row in set (0.00 sec)
+
+root@localhost test>insert users values(null,'Tom','124',15,1);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>select * from users;
++----+----------+----------+-----+------+
+| id | username | password | age | sex  |
++----+----------+----------+-----+------+
+|  1 | Tom      | 123      |  15 |    1 |
+|  2 | Tom      | 124      |  15 |    1 |
++----+----------+----------+-----+------+
+2 rows in set (0.00 sec)
+
+root@localhost test>insert users values(default,'Tom','124',15,1);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>select * from users;
++----+----------+----------+-----+------+
+| id | username | password | age | sex  |
++----+----------+----------+-----+------+
+|  1 | Tom      | 123      |  15 |    1 |
+|  2 | Tom      | 124      |  15 |    1 |
+|  3 | Tom      | 124      |  15 |    1 |
++----+----------+----------+-----+------+
+3 rows in set (0.00 sec)
+
+root@localhost test>insert users values(default,'Tom','124',15,1),(null,'Rose',md5('123'),default,0);
+Query OK, 2 rows affected (0.01 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+root@localhost test>select * from users;                                                  +----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  15 |    1 |
+|  2 | Tom      | 124                              |  15 |    1 |
+|  3 | Tom      | 124                              |  15 |    1 |
+|  4 | Tom      | 124                              |  15 |    1 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  10 |    0 |
++----+----------+----------------------------------+-----+------+
+5 rows in set (0.00 sec)
+
+
+
+
+root@localhost test>create table test(
+    -> id tinyint unsigned key auto_increment,
+    -> username varchar(20)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+root@localhost test>show clumns form test;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'clumns form test' at line 1
+root@localhost test>show columns from test;
++----------+---------------------+------+-----+---------+----------------+
+| Field    | Type                | Null | Key | Default | Extra          |
++----------+---------------------+------+-----+---------+----------------+
+| id       | tinyint(3) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)         | YES  |     | NULL    |                |
++----------+---------------------+------+-----+---------+----------------+
+2 rows in set (0.00 sec)
+
+root@localhost test>select * from test;
+Empty set (0.00 sec)
+
+root@localhost test>insert test(username) select username from users where age >=20;
+Query OK, 4 rows affected (0.00 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+root@localhost test>select * from test;
++----+----------+
+| id | username |
++----+----------+
+|  1 | Tom      |
+|  2 | Tom      |
+|  3 | Tom      |
+|  4 | 111      |
++----+----------+
+4 rows in set (0.00 sec)
+**** 插入记录 insert set
+INSERT [INFO] tbl_name SET col_name={expr | DEFAULT},...
+与上一种方式的区别在于，此方法可以使用子查询（subquery)
+只能插入一条记录
+
+root@localhost test>insert users set username='Ben', password='456';
+Query OK, 1 row affected (0.01 sec)
+
+root@localhost test>show columns from users;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   |     | NULL    |                |
+| password | varchar(32)          | NO   |     | NULL    |                |
+| age      | tinyint(3) unsigned  | NO   |     | 10      |                |
+| sex      | tinyint(1)           | YES  |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  15 |    1 |
+|  2 | Tom      | 124                              |  15 |    1 |
+|  3 | Tom      | 124                              |  15 |    1 |
+|  4 | Tom      | 124                              |  15 |    1 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  10 |    0 |
+|  6 | Ben      | 456                              |  10 | NULL |
++----+----------+----------------------------------+-----+------+
+6 rows in set (0.01 sec)
+**** 单表更新记录update
+
+     root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  20 |    1 |
+|  2 | Tom      | 124                              |  20 |    1 |
+|  3 | Tom      | 124                              |  20 |    1 |
+|  4 | Tom      | 124                              |  20 |    1 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  6 | Ben      | 456                              |  15 | NULL |
++----+----------+----------------------------------+-----+------+
+6 rows in set (0.00 sec)
+
+root@localhost test>update users set age= age + 5
+    -> ;
+Query OK, 6 rows affected (0.00 sec)
+Rows matched: 6  Changed: 6  Warnings: 0
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  25 |    1 |
+|  2 | Tom      | 124                              |  25 |    1 |
+|  3 | Tom      | 124                              |  25 |    1 |
+|  4 | Tom      | 124                              |  25 |    1 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  20 |    0 |
+|  6 | Ben      | 456                              |  20 | NULL |
++----+----------+----------------------------------+-----+------+
+6 rows in set (0.00 sec)
+
+root@localhost test>update users set age=age-id,sex=0;
+Query OK, 6 rows affected (0.00 sec)
+Rows matched: 6  Changed: 6  Warnings: 0
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  24 |    0 |
+|  2 | Tom      | 124                              |  23 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  4 | Tom      | 124                              |  21 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  6 | Ben      | 456                              |  14 |    0 |
++----+----------+----------------------------------+-----+------+
+6 rows in set (0.00 sec)
+
+root@localhost test>update users set age = age+10 where id %2 =0;
+Query OK, 3 rows affected (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 0
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  24 |    0 |
+|  2 | Tom      | 124                              |  33 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  6 | Ben      | 456                              |  24 |    0 |
++----+----------+----------------------------------+-----+------+
+6 rows in set (0.00 sec)
+**** 单表删除记录delete
+DELETE FROM tbl_name [WHERE where_condition]
+
+root@localhost test>
+root@localhost test>delete from users where id = 6;
+Query OK, 1 row affected (0.01 sec)
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  24 |    0 |
+|  2 | Tom      | 124                              |  33 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
++----+----------+----------------------------------+-----+------+
+5 rows in set (0.00 sec)
+
+root@localhost test>delete from users where id = 2;
+Query OK, 1 row affected (0.01 sec)
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  24 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
++----+----------+----------------------------------+-----+------+
+4 rows in set (0.00 sec)
+
+root@localhost test>insert users values(null,'111','222',33,null);
+Query OK, 1 row affected (0.00 sec)
+
+root@localhost test>select * from users;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  1 | Tom      | 123                              |  24 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  7 | 111      | 222                              |  33 | NULL |
++----+----------+----------------------------------+-----+------+
+5 rows in set (0.00 sec)
+**** 查询表达式解析 select
+
+root@localhost test>select id, username from users;
++----+----------+
+| id | username |
++----+----------+
+|  1 | Tom      |
+|  3 | Tom      |
+|  4 | Tom      |
+|  5 | Rose     |
+|  7 | 111      |
++----+----------+
+5 rows in set (0.00 sec)
+
+顺序影响
+root@localhost test>select username,id from users;
++----------+----+
+| username | id |
++----------+----+
+| Tom      |  1 |
+| Tom      |  3 |
+| Tom      |  4 |
+| Rose     |  5 |
+| 111      |  7 |
++----------+----+
+5 rows in set (0.00 sec)
+
+附属关系
+root@localhost test>select users.id, users.username from users;
++----+----------+
+| id | username |
++----+----------+
+|  1 | Tom      |
+|  3 | Tom      |
+|  4 | Tom      |
+|  5 | Rose     |
+|  7 | 111      |
++----+----------+
+5 rows in set (0.00 sec)
+
+别名
+root@localhost test>select id as userId, username as uname from users;
++--------+-------+
+| userId | uname |
++--------+-------+
+|      1 | Tom   |
+|      3 | Tom   |
+|      4 | Tom   |
+|      5 | Rose  |
+|      7 | 111   |
++--------+-------+
+5 rows in set (0.00 sec)
+**** where 语句进行条件查询
+对记录进行过滤，如果没有where子句，则显示全部记录。
+在where表达式中，可以使用mysql支持的函数或运算符。
+**** gourp by 对查询结果分组
+root@localhost test>select sex from users group by sex;
++------+
+| sex  |
++------+
+| NULL |
+|    0 |
++------+
+2 rows in set (0.00 sec)
+**** having 设置分组条件
+**** order_by 对结果进行排序
+root@localhost test>select * from users order by id desc;;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  7 | 111      | 222                              |  33 | NULL |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  1 | Tom      | 123                              |  24 |    0 |
++----+----------+----------------------------------+-----+------+
+5 rows in set (0.00 sec)
+
+ERROR:
+No query specified
+
+root@localhost test>select * from users order by age, id desc;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
+|  3 | Tom      | 124                              |  22 |    0 |
+|  1 | Tom      | 123                              |  24 |    0 |
+|  4 | Tom      | 124                              |  31 |    0 |
+|  7 | 111      | 222                              |  33 | NULL |
++----+----------+----------------------------------+-----+------+
+5 rows in set (0.00 sec)
+**** limit 限制查询数量
+root@localhost test>select * from users limit 3;
++----+----------+----------+-----+------+
+| id | username | password | age | sex  |
++----+----------+----------+-----+------+
+|  1 | Tom      | 123      |  24 |    0 |
+|  3 | Tom      | 124      |  22 |    0 |
+|  4 | Tom      | 124      |  31 |    0 |
++----+----------+----------+-----+------+
+3 rows in set (0.00 sec)
+
+root@localhost test>select * form users limit 2,2;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'form users limit 2,2' at line 1
+root@localhost test>select * from users limit 2,2;
++----+----------+----------------------------------+-----+------+
+| id | username | password                         | age | sex  |
++----+----------+----------------------------------+-----+------+
+|  4 | Tom      | 124                              |  31 |    0 |
+|  5 | Rose     | 202cb962ac59075b964b07152d234b70 |  15 |    0 |
++----+----------+----------------------------------+-----+------+
+2 rows in set (0.01 sec)
+
+root@localhost test>select * from users order by id desc limit 2,2;
++----+----------+----------+-----+------+
+| id | username | password | age | sex  |
++----+----------+----------+-----+------+
+|  4 | Tom      | 124      |  31 |    0 |
+|  3 | Tom      | 124      |  22 |    0 |
++----+----------+----------+-----+------+
+2 rows in set (0.00 sec)
+*** 小结
+创建数据库 create database test;
+删除数据库 drop database test;
+
+查询表结构 show columns from test;
+创建表 create table test(
+id tinyint unsigned key auto_increment,
+username varchar(20) not null
+);
+修改表 alter table test add age tinyint unsigned not null;
+删除表 alter table test drop age;
+
+查看记录 select * from test;
+插入记录 insert test values(default,'Tom');
+修改记录 update test set aget=age-id;
+删除记录 delete from test where id = 2;
 
 ** tcp/ip
 ** 数据结构，算法
@@ -648,3 +1255,10 @@ whereis command 查看程序的搜索路径
 - 复制：cp （复制目录：cp -r）
 查看当前目录下文件个数
 find ./ | wc -l
+*** 目录切换 
+cd
+cd ~
+cd -
+pwd
+*** 列出目录项
+    ls -lrt 按时间排序

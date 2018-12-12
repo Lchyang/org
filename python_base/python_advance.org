@@ -308,7 +308,7 @@ str.ljust, str.rjust, str.center
 ** TODO 文件I/O高效处理案例训练
 *** 如何读写文本文件
 **** python2 中读写字符串
-python2 中默认的str是二进制编码，支持中文的是unicode字符串
+     python2 中默认的str是二进制编码，支持中文的是unicode字符串
 #+BEGIN_SRC python
   In [4]: f = open('py2.txt', 'w')
 

@@ -8,3 +8,12 @@
 学习linux基本的命令
 学习http
 准备面试题 和面试
+* 面试总结
+linux 常用操作
+git 常用操作
+数据库 常用操作
+python 单元测试 模块循环引用
+Django models 外键表在子表之前
+django url namespace
+
+

@@ -908,7 +908,67 @@ username varchar(20) not null
 插入记录 insert test values(default,'Tom');
 修改记录 update test set aget=age-id;
 删除记录 delete from test where id = 2;
+*** 子查询与连接
+**** 子查询 
+子查询指嵌套在查询内部，且必须始终出现在小括号内。
+子查询可以包含多个关键字或条件，
+如 distinct, group by, order by, limit 函数等。
+子查询的外层查询可以是：select, insert, update, set 或 do.
 
+子查询可以返回标量、一行、一列或子查询。
+**** 使用比较运算符的子查询
+root@localhost test>select goods_id, goods_name, goods_price from 
+tdb_goods where goods_price > (select round(avg(goods_price)) from tdb_goods);
++----------+-----------------------------------------+-------------+
+| goods_id | goods_name                              | goods_price |
++----------+-----------------------------------------+-------------+
+|        3 | G150TH 15.6英寸游戏本                   |    8499.000 |
+|        9 | iMac ME086CH/A 21.5英寸一体电脑         |    9188.000 |
+|       13 | Mac Pro MD878CH/A 专业级台式电脑        |   28888.000 |
++----------+-----------------------------------------+-------------+
+3 rows in set (0.00 sec)
+
+如果子查询返回多个记录可以用 any 或 all 修饰 != 时只能用all
+root@localhost test>select goods_id, goods_name, goods_price from tdb_goods 
+where goods_price > all (select goods_cate = '超级本' from tdb_goods);
+
+还是以使用 in not in
+**** 使用insert select 插入记录
+
+root@localhost test>create table tdb_goods_cates(
+    -> cate_id smallint unsigned key auto_increment,
+    -> cate_name varchar(40) not null
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+root@localhost test>select goods_cate from tdb_goods group by goods_cate;
++---------------------+
+| goods_cate          |
++---------------------+
+| 台式机              |
+| 服务器/工作站       |
+| 游戏本              |
+| 笔记本              |
+| 超级本              |
++---------------------+
+5 rows in set (0.00 sec)
+
+root@localhost test>insert tdb_goods_cates(cate_name) select goods_cate from tdb_goods group by goods_cate;
+Query OK, 5 rows affected (0.00 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+root@localhost test>select * from tdb_goods_cates;
++---------+---------------------+
+| cate_id | cate_name           |
++---------+---------------------+
+|       1 | 台式机              |
+|       2 | 服务器/工作站       |
+|       3 | 游戏本              |
+|       4 | 笔记本              |
+|       5 | 超级本              |
++---------+---------------------+
+5 rows in set (0.00 sec)
+**** 
 ** tcp/ip
 ** 数据结构，算法
 ** python 语言
@@ -1236,6 +1296,18 @@ pip install django-celery
 运行时 python managge.py runserver,   python manage.py celery worker -l INFO
 运行定时任务要加上  python manage.py celery beat -l INFO
 * linux基础 
+** 50个最常用的linux命令
+grep
+find
+ps
+free
+top
+df
+kill
+cat
+chmod
+ifconfig
+
 ** 学会使用命令帮助
 whatis command 简要说明命令的作用
 whatis -w 'l*' 正则匹配
@@ -1262,3 +1334,4 @@ cd -
 pwd
 *** 列出目录项
     ls -lrt 按时间排序
+    ls -lh 按文件大小排序

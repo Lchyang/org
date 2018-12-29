@@ -325,15 +325,3 @@ public bool IsLength(string str_Length) { return System.Text.RegularExpressions.
 
 
 
-
- 1，search(pattern, string,flags=0)
-	在一个字符串中查找匹配
-
- 2. findall(pattern,string,flag=0)
-	找到匹配，返回所有匹配部分的列表
- 
- 3. sub(pattern,repl,string,count=0,flags=0)
-	将字符串中正则表达式的部分替换成其他值
-
- 4. split(pattern,string,maxsplit=0,flags=0)
-	根据匹配分割字符串，返回分割字符串组成的列表

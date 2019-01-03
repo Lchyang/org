@@ -2001,23 +2001,23 @@ extend方法传递一个可迭代对象，可以是list、tuple、set、只因�
 * python 语言特性
 *** python 参数的传递
     #+BEGIN_SRC python
-    a = 1
-    def fun(a):
-        print "func_in",id(a)   # func_in 41322472
-        a = 2
-        print "re-point",id(a), id(2)   # re-point 41322448 41322448
-    print "func_out",id(a), id(1)  # func_out 41322472 41322472
-    fun(a)
-    print a  # 1
+      a = 1
+      def fun(a):
+          print "func_in",id(a)   # func_in 41322472
+          a = 2
+          print "re-point",id(a), id(2)   # re-point 41322448 41322448
+      print "func_out",id(a), id(1)  # func_out 41322472 41322472
+      fun(a)
+      print a  # 1
 
 
-    a = []
-    def fun(a):
-        print "func_in",id(a)  # func_in 53629256
-        a.append(1)
-    print "func_out",id(a)     # func_out 53629256
-    fun(a)
-    print a  # [1]
+      a = []
+      def fun(a):
+          print "func_in",id(a)  # func_in 53629256
+          a.append(1)
+      print "func_out",id(a)     # func_out 53629256
+      fun(a)
+      print a  # [1]
     #+END_SRC
     类型是属于对象的而不是变量,在 python 中有可更改(mutable)和不可更改对象(immutable),
     strings,tuples,numbers 是不可更改对象, list,dict,set 是可更改的对象.

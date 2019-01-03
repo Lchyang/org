@@ -1,0 +1,8 @@
+* 配置 python 开发环境
+** 安装 pyenv 配置好虚拟环境
+** 下载插件
+pip install -i https://pypi.doubanio.com/simple --upgrade "jedi>=0.9.0" "json-rpc>=1.8.1" 
+"service_factory>=0.1.5" flake8 pytest autoflake hy isort
+** 阅读 python model org 说明
+
+

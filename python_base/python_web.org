@@ -1,7 +1,7 @@
 * python web 开发 
 ** 数据库
-*** 启动/关闭mysql服务 
-*** 修改mysql提示符
+*** 启动/关闭 mysql 服务 
+*** 修改 mysql 提示符
 使用 prompt
 \D 完整的日期
 \d 当前数据库
@@ -14,7 +14,7 @@ SELECT VERSION();
 SELECT NOW();
 - 关键字与函数名称全部大写
 - 数据库名称、表名称、字段名称小写
-- sql语句必须以分号结尾
+- sql 语句必须以分号结尾
 *** 操作数据库(数据库的增删改查)
 **** 创建数据库
 CREATE {DATABASE | SCHEMA} [IF NOT EXISTS] db_name [DEFAULT]
@@ -41,7 +41,7 @@ MEDIUMINT 三个字节 0-16777215
 INT      四个字节 0-2**32-1
 BIGINT   八个字节 0-2**64-1
 **** 浮点型
-FLOAT[(M,D)] M是数字总位数，D是小数点后边的位数。如果省略则根据硬件限制量保存值。
+FLOAT[(M,D)] M 是数字总位数，D 是小数点后边的位数。如果省略则根据硬件限制量保存值。
 DOUBLE[(M,D)]
 **** 日期时间型
 YEAR
@@ -50,31 +50,31 @@ DATE
 DATETIME
 TIMESTAMP
 **** 字符型
-MySQL数据类型	含义
-char(n)	固定长度，最多255个字符
-varchar(n)	固定长度，最多65535个字符
-tinytext	可变长度，最多255个字符
-text	可变长度，最多65535个字符
-mediumtext	可变长度，最多2的24次方-1个字符
-longtext	可变长度，最多2的32次方-1个字符
+MySQL 数据类型	含义
+char(n)	固定长度，最多 255 个字符
+varchar(n)	固定长度，最多 65535 个字符
+tinytext	可变长度，最多 255 个字符
+text	可变长度，最多 65535 个字符
+mediumtext	可变长度，最多 2 的 24 次方-1 个字符
+longtext	可变长度，最多 2 的 32 次方-1 个字符
 
-char和varchar：
-1.char(n) 若存入字符数小于n，则以空格补于其后，查询之时再将空格去掉。所以char类
-型存储的字符串末尾不能有空格，varchar不限于此。
-2.char(n) 固定长度，char(4)不管是存入几个字符，都将占用4个字节，varchar是存入的
-实际字符数+1个字节（n<=255）或2个字节(n>255)，所以varchar(4),存入3个字符将占用4个字节。 
-3.char类型的字符串检索速度要比varchar类型的快。
+char 和 varchar：
+1.char(n) 若存入字符数小于 n，则以空格补于其后，查询之时再将空格去掉。所以 char 类
+型存储的字符串末尾不能有空格，varchar 不限于此。
+2.char(n) 固定长度，char(4)不管是存入几个字符，都将占用 4 个字节，varchar 是存入的
+实际字符数+1 个字节（n<=255）或 2 个字节(n>255)，所以 varchar(4),存入 3 个字符将占用 4 个字节。 
+3.char 类型的字符串检索速度要比 varchar 类型的快。
 
-varchar和text： 
-1.varchar可指定n，text不能指定，内部存储varchar是存入的实际字符数+1个字节
-（n<=255）或2个字节(n>255)，text是实际字符数+2个字节。 
-2.text类型不能有默认值。 
-3.varchar可直接创建索引，text创建索引要指定前多少个字符。varchar查询速度快于
-text,在都创建索引的情况下，text的索引似乎不起作用。
+varchar 和 text： 
+1.varchar 可指定 n，text 不能指定，内部存储 varchar 是存入的实际字符数+1 个字节
+（n<=255）或 2 个字节(n>255)，text 是实际字符数+2 个字节。 
+2.text 类型不能有默认值。 
+3.varchar 可直接创建索引，text 创建索引要指定前多少个字符。varchar 查询速度快于
+text,在都创建索引的情况下，text 的索引似乎不起作用。
 **** 枚举型
 ENUM('value1','value2',...)
 **** set
-SET('value1','value2',...) 最多64个成员，做所有成员的排列组合。
+SET('value1','value2',...) 最多 64 个成员，做所有成员的排列组合。
 *** 操作数据表
 打开数据库 USE databasename;
 SELECT DATABASE(); 显示当前打开数据库
@@ -171,12 +171,12 @@ root@localhost test>INSERT tb2 VALUES(NULL, 22);
 ERROR 1048 (23000): Column 'username' cannot be null
 **** mysql 自动编号（AUTO_INCREMENT)
 自动编号，必须和主键组合使用
-默认情况下，起始值为1， 每次增量为1
+默认情况下，起始值为 1， 每次增量为 1
 AUTO_INCREMENT 必须和主键一起使用，主键不必须有 AUTO_INCREMENT
 **** 主键约束
 每张表只能存在一个主键
 主键保证记录的唯一性
-主键自动为NOT NULL
+主键自动为 NOT NULL
 
 root@localhost test>CREATE TABLE tb3(
     -> id SMALLINT UNSIGNED AUTO_INCREMENT KEY,
@@ -212,7 +212,7 @@ root@localhost test>SELECT * FROM tb3;
 +----+----------+
 3 rows in set (0.00 sec)
 
-如果没有AUTO_INCREMENT 主键得手动赋值。
+如果没有 AUTO_INCREMENT 主键得手动赋值。
 
 root@localhost test>CREATE TABLE tb4(
     -> id SMALLINT UNSIGNED KEY,
@@ -271,7 +271,7 @@ Query OK, 1 row affected (0.00 sec)
 
 root@localhost test>INSERT tb5(username,age) VALUES('Tom',22);
 ERROR 1062 (23000): Duplicate entry 'Tom' for key 'username'
-唯一约束，字段的key不可以重复
+唯一约束，字段的 key 不可以重复
 **** 初涉默认约束
 当插入记录时，如果没有明确的字段赋值，则自动赋予默认值。 
 root@localhost test>CREATE TABLE tb6(
@@ -304,10 +304,10 @@ root@localhost test>SELECT * FROM tb6;
 *** 约束以及修改数据表(表结构的修改)
 **** 外键约束的要求
 1.父表和子表必须使用相同的存储引擎，而且禁止使用临时表。
-2.数据表的存储引擎只能为InnoDB
+2.数据表的存储引擎只能为 InnoDB
 3.外键列和参照列必须具有相似的数据类型。其中数字的长度和是否有符号位必须相同；而
 字符长度则可以不同。
-4.外键列和参照列必须创建索引。如果外键列不存在索引的话，mysql将自动创建索引。
+4.外键列和参照列必须创建索引。如果外键列不存在索引的话，mysql 将自动创建索引。
 
 root@localhost test>CREATE TABLE provinces( 
 id SMALLINT UNSIGNED KEY AUTO_INCREMENT,
@@ -326,10 +326,10 @@ default-storage-engine = INNODB
 
 **** 外键约束的参照操作
 1、CASCADE:从父表中删除或更新且自动删除或更新字表中匹配的行
-2、SET NULL: 从附表删除或更新行，并设置字表的外键列为NULL。
-如果使用该选项，必须保证字表列中没有指定的NOT NULL
+2、SET NULL: 从附表删除或更新行，并设置字表的外键列为 NULL。
+如果使用该选项，必须保证字表列中没有指定的 NOT NULL
 3、RESTRICT: 拒绝父表的删除后更新操作
-4、NO ACTION: 标准sql关键字，在mysql中与RESTRICT相同。
+4、NO ACTION: 标准 sql 关键字，在 mysql 中与 RESTRICT 相同。
 
 **** 表级约束与列级约束
 **** 修改数据表 ***** 
@@ -657,7 +657,7 @@ root@localhost test>select * from users;
 |  6 | Ben      | 456                              |  10 | NULL |
 +----+----------+----------------------------------+-----+------+
 6 rows in set (0.01 sec)
-**** 单表更新记录update
+**** 单表更新记录 update
 
      root@localhost test>select * from users;
 +----+----------+----------------------------------+-----+------+
@@ -723,7 +723,7 @@ root@localhost test>select * from users;
 |  6 | Ben      | 456                              |  24 |    0 |
 +----+----------+----------------------------------+-----+------+
 6 rows in set (0.00 sec)
-**** 单表删除记录delete
+**** 单表删除记录 delete
 DELETE FROM tbl_name [WHERE where_condition]
 
 root@localhost test>
@@ -823,8 +823,8 @@ root@localhost test>select id as userId, username as uname from users;
 +--------+-------+
 5 rows in set (0.00 sec)
 **** where 语句进行条件查询
-对记录进行过滤，如果没有where子句，则显示全部记录。
-在where表达式中，可以使用mysql支持的函数或运算符。
+对记录进行过滤，如果没有 where 子句，则显示全部记录。
+在 where 表达式中，可以使用 mysql 支持的函数或运算符。
 **** gourp by 对查询结果分组
 root@localhost test>select sex from users group by sex;
 +------+
@@ -922,18 +922,18 @@ tdb_goods where goods_price > (select round(avg(goods_price)) from tdb_goods);
 +----------+-----------------------------------------+-------------+
 | goods_id | goods_name                              | goods_price |
 +----------+-----------------------------------------+-------------+
-|        3 | G150TH 15.6英寸游戏本                   |    8499.000 |
-|        9 | iMac ME086CH/A 21.5英寸一体电脑         |    9188.000 |
+|        3 | G150TH 15.6 英寸游戏本                   |    8499.000 |
+|        9 | iMac ME086CH/A 21.5 英寸一体电脑         |    9188.000 |
 |       13 | Mac Pro MD878CH/A 专业级台式电脑        |   28888.000 |
 +----------+-----------------------------------------+-------------+
 3 rows in set (0.00 sec)
 
-如果子查询返回多个记录可以用 any 或 all 修饰 != 时只能用all
+如果子查询返回多个记录可以用 any 或 all 修饰 != 时只能用 all
 root@localhost test>select goods_id, goods_name, goods_price from tdb_goods 
 where goods_price > all (select goods_cate = '超级本' from tdb_goods);
 
 还是以使用 in not in
-**** 使用insert select 插入记录
+**** 使用 insert select 插入记录
 
 root@localhost test>create table tdb_goods_cates(
     -> cate_id smallint unsigned key auto_increment,
@@ -972,13 +972,13 @@ root@localhost test>select * from tdb_goods_cates;
 ** tcp/ip
 ** 数据结构，算法
 ** python 语言
-** linux系统
+** linux 系统
 *** ln
 ln 链接两个文件 是硬链接 在磁盘上开辟新的空间
 ln -f 如果链接已经存在 可以重置链接
 ln -s 软链接 不在磁盘开辟新的空间 而是新建一个小文件来记录链接
 
-ln 和 ln -s 区别 如果ln删除源文件 链接文件还可以用 ln -s不可以
+ln 和 ln -s 区别 如果 ln 删除源文件 链接文件还可以用 ln -s 不可以
 *** mkdir
 mkdir -p a/b/c
 mkdir -v a 创建完成后返回创建是否成功信息
@@ -986,9 +986,9 @@ mkdir -v a 创建完成后返回创建是否成功信息
 cp a.txt b.txt
 cp a.txt b.txt foo
 cp -v a.txt b.txt
-cp -f 相当于强制cp当权限不允许的情况下
+cp -f 相当于强制 cp 当权限不允许的情况下
 cp -i 提示是否覆盖已有文件
-cp -r foo bar copy文件夹时
+cp -r foo bar copy 文件夹时
 *** rm
     rm 和 cp 用法类似
 *** Input/Output(|,>)
@@ -1004,9 +1004,9 @@ grep -n django requirements.txt 显示行号
 grep -i django requirements.txt 忽略大小写
 grep djanog requirements.txt django.txt 从多个文件中搜索
 gerp -r django ctyun 从文件中搜索
-grep -r --include="*.py" "django" ctyun 从ctyun文件夹的.py 文件中搜索django
-grep -v "a" requirements.txt 搜索不包含a的所有行
-grep -v "^$" requirements | grep -v "a" 搜索包含空行的非字符a的行
+grep -r --include="*.py" "django" ctyun 从 ctyun 文件夹的.py 文件中搜索 django
+grep -v "a" requirements.txt 搜索不包含 a 的所有行
+grep -v "^$" requirements | grep -v "a" 搜索包含空行的非字符 a 的行
 *** ps
 ps
 ps u
@@ -1015,7 +1015,7 @@ ps -U root /ps -U lichunyang
 ps -L
 ps -O etime,%cpu,%mem
 ps -m -O %mem -u root 根据占用内存排序
-ps -r -O %cpu -u root 根据占用cpu排序
+ps -r -O %cpu -u root 根据占用 cpu 排序
 
 ** django 项目
 *** django 部署（nginx + gunicorn)
@@ -1037,10 +1037,10 @@ server {
         proxy_pass http://unix:/tmp/demo.zmrenwu.com.socket;
     }
 }
-使用非root用户 log /var/log/nginx/error.log 配置/etc/nginx/sites-av../
-1 域名或者ip
-2 当路径中写static 用 alias  没有写用 root
-3 proxy_pass 不能用localhost代替127.0.0.1
+使用非 root 用户 log /var/log/nginx/error.log 配置/etc/nginx/sites-av../
+1 域名或者 ip
+2 当路径中写 static 用 alias  没有写用 root
+3 proxy_pass 不能用 localhost 代替 127.0.0.1
 *** DRF views 梳理
 **** GenericViewSet(viewset)
 ***** GenericaAPIView
@@ -1058,9 +1058,9 @@ server {
   专注于实时处理异步任务队列
   同时也支持任务调度
 ***** 使用场景
-  异步任务： 将耗时操作任务提交给celery去异步执行，比如发送短信/邮件、消息推送、
+  异步任务： 将耗时操作任务提交给 celery 去异步执行，比如发送短信/邮件、消息推送、
   音视频处理等
-  定时任务： 类似于crontab， 比如每日数据统计
+  定时任务： 类似于 crontab， 比如每日数据统计
 ***** Celery 基本使用
   tasks.py
   #+BEGIN_SRC python
@@ -1165,7 +1165,7 @@ server {
     task2.multiply.delay(4, 5)
     print('end...')
   #+END_SRC
-  通过 celery worker -A celery_app -l INFO 命令启动worker
+  通过 celery worker -A celery_app -l INFO 命令启动 worker
   然后运行 python test_celery.py 
 ***** 定时任务
   #+BEGIN_SRC python
@@ -1201,10 +1201,10 @@ server {
   启动 任务
   celery worker -A celery_app -l INFO
   celery beat -A celery_app -l INFO
-***** Django 中使用celery
+***** Django 中使用 celery
   pip install django-celery 
 
-  在setting同目录下创建celeryconfig.py文件
+  在 setting 同目录下创建 celeryconfig.py 文件
   #+BEGIN_SRC python
     from datetime import timedelta
     import djcelery
@@ -1237,13 +1237,13 @@ server {
     # 有些情况可以防止死锁
     CELERYD_FORCE_EXECV = True
 
-    # 设置并发的worker数量
+    # 设置并发的 worker 数量
     CELERYD_CONCURRENCY = 4
 
     # 允许重试
     CELERY_ACKS_LATE = True
 
-    # 每个worker最多执行100个任务被销毁，可是防止内存泄漏
+    # 每个 worker 最多执行 100 个任务被销毁，可是防止内存泄漏
     CELERYD_MAX_TASKS_PER_CHILD = 100
 
     #单个任务的最大运行时间
@@ -1262,17 +1262,17 @@ server {
     }
   #+END_SRC
 
-  在app中注册 djcelery 在setting.py 中增加
+  在 app 中注册 djcelery 在 setting.py 中增加
   #+BEGIN_SRC python
     #celery
-    from .celeryconfig import *  #使celeryconfig 和setting联系
+    from .celeryconfig import *  #使 celeryconfig 和 setting 联系
     # redis 配置
     BROKER_BACKEND = 'redis' 
     BROKER_URL = 'redis://localhost:6379/1'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
   #+END_SRC
 
-  在应用下创建task.py文件
+  在应用下创建 task.py 文件
   #+BEGIN_SRC python
     import time
 
@@ -1289,7 +1289,7 @@ server {
             print('end course task')
   #+END_SRC
 
-  在views中
+  在 views 中
   #+BEGIN_SRC python
     from django.http import JsonResponse
 
@@ -1304,11 +1304,11 @@ server {
         return JsonResponse({'result': 'ok'})
   #+END_SRC
 
-  配置url访问views
+  配置 url 访问 views
   运行时 python managge.py runserver,   python manage.py celery worker -l INFO
   运行定时任务要加上  python manage.py celery beat -l INFO
-* linux基础 
-** 50个最常用的linux命令
+* linux 基础 
+** 50 个最常用的 linux 命令
 grep
 find
 ps
@@ -1324,7 +1324,7 @@ ifconfig
 whatis command 简要说明命令的作用
 whatis -w 'l*' 正则匹配
 info command 更加详细的说明文档
-man command 查询command说明文档
+man command 查询 command 说明文档
 which command 查看文件所在路径
 whereis command 查看程序的搜索路径
 当系统中安装了同一个软件的多个版本时，不确定用的是哪个版本时，这个命令就排上了
@@ -1333,10 +1333,10 @@ whereis command 查看程序的搜索路径
 *** 创建和删除
 - 创建：mkdir
 - 删除：rm
-- 删除非空目录： rm -rf file
+- 删除非空目录：rm -rf file
 - 删除日志 rm *log (等价 find ./ -name '*log' -exec rm {};)
-- 移动： mv
-- 复制：cp （复制目录：cp -r）
+- 移动：mv
+- 复制：cp（复制目录：cp -r）
 查看当前目录下文件个数
 find ./ | wc -l
 *** 目录切换 
@@ -1345,5 +1345,11 @@ cd ~
 cd -
 pwd
 *** 列出目录项
+    :LOGBOOK:
+    CLOCK: [2019-01-04 Fri 11:07]--[2019-01-04 Fri 11:09] =>  0:02
+    :END:
     ls -lrt 按时间排序
     ls -lh 按文件大小排序
+#+BEGIN_SRC python
+
+#+END_SRC

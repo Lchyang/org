@@ -3,9 +3,9 @@ celery 是一个简单、灵活且可靠的、处理大量消息的分布式系�
 专注于实时处理异步任务队列
 同时也支持任务调度
 *** 使用场景
-异步任务： 将耗时操作任务提交给celery去异步执行，比如发送短信/邮件、消息推送、
+异步任务： 将耗时操作任务提交给 celery 去异步执行，比如发送短信/邮件、消息推送、
 音视频处理等
-定时任务： 类似于crontab， 比如每日数据统计
+定时任务： 类似于 crontab， 比如每日数据统计
 *** Celery 基本使用
 tasks.py
 #+BEGIN_SRC python
@@ -110,7 +110,7 @@ test_celery.py
   task2.multiply.delay(4, 5)
   print('end...')
 #+END_SRC
-通过 celery worker -A celery_app -l INFO 命令启动worker
+通过 celery worker -A celery_app -l INFO 命令启动 worker
 然后运行 python test_celery.py 
 *** 定时任务
 #+BEGIN_SRC python
@@ -146,10 +146,10 @@ test_celery.py
 启动 任务
 celery worker -A celery_app -l INFO
 celery beat -A celery_app -l INFO
-*** Django 中使用celery
+*** Django 中使用 celery
 pip install django-celery 
 
-在setting同目录下创建celeryconfig.py文件
+在 setting 同目录下创建 celeryconfig.py 文件
 #+BEGIN_SRC python
   from datetime import timedelta
   import djcelery
@@ -182,13 +182,13 @@ pip install django-celery
   # 有些情况可以防止死锁
   CELERYD_FORCE_EXECV = True
 
-  # 设置并发的worker数量
+  # 设置并发的 worker 数量
   CELERYD_CONCURRENCY = 4
 
   # 允许重试
   CELERY_ACKS_LATE = True
 
-  # 每个worker最多执行100个任务被销毁，可是防止内存泄漏
+  # 每个 worker 最多执行 100 个任务被销毁，可是防止内存泄漏
   CELERYD_MAX_TASKS_PER_CHILD = 100
 
   #单个任务的最大运行时间
@@ -207,17 +207,17 @@ pip install django-celery
   }
 #+END_SRC
 
-在app中注册 djcelery 在setting.py 中增加
+在 app 中注册 djcelery 在 setting.py 中增加
 #+BEGIN_SRC python
   #celery
-  from .celeryconfig import *  #使celeryconfig 和setting联系
+  from .celeryconfig import *  #使 celeryconfig 和 setting 联系
   # redis 配置
   BROKER_BACKEND = 'redis' 
   BROKER_URL = 'redis://localhost:6379/1'
   CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
 #+END_SRC
 
-在应用下创建task.py文件
+在应用下创建 task.py 文件
 #+BEGIN_SRC python
   import time
 
@@ -234,7 +234,7 @@ pip install django-celery
           print('end course task')
 #+END_SRC
 
-在views中
+在 views 中
 #+BEGIN_SRC python
   from django.http import JsonResponse
 
@@ -249,6 +249,6 @@ pip install django-celery
       return JsonResponse({'result': 'ok'})
 #+END_SRC
 
-配置url访问views
+配置 url 访问 views
 运行时 python managge.py runserver,   python manage.py celery worker -l INFO
 运行定时任务要加上  python manage.py celery beat -l INFO

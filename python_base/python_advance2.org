@@ -1,0 +1,1776 @@
+* TODO python 高级编程和异步 IO 并发编程
+** python 一切皆对象
+*** python 一切皆对象
+**** 函数和类也是对象，属于 python 的一等公民
+1、赋值给一个变量
+2、可以添加到集合对象
+3、可以作为参数传递
+4、可以当做函数返回
+*** class object type 的关系
+*** python 常见的内置类型 
+**** None（全局只有一个）
+**** 数值类型
+- int
+- float
+- complex(复数）
+- bool
+**** 迭代类型
+**** 序列类型
+- list
+- bytes, bytearray, memoryview(二进制序列)
+- range
+- tuple
+- str 
+- array 
+**** 映射类型（dict)
+**** 集合
+- set
+- frozenset
+**** 上下文管理类型（with)
+**** 其他
+- 模块类型
+- class 和实例
+- 函数类型
+- 方法类型
+- 代码类型
+- object 对象
+- type 类型
+- ellipsis 类型（省略号）
+- notimplemented 类型
+** python 的魔法函数
+*** 什么是魔法函数
+    在 python 中 双下划线开头和双下划线结尾的函数是魔法函数
+#+BEGIN_SRC python
+  class Company:
+      def __init__(self, employee_list):
+          self.employee = employee_list
+
+      def __getitem__(self, item):
+          return self.employee[item]
+
+
+  company = Company(['tom', 'bob', 'jame'])        
+
+  for em in company.employee: #没有__getitem__只能这样用
+      print(em)
+
+  for em in company: #现在可以这样用
+      print(em)
+#+END_SRC
+通过__getitem__魔法函数可以 Company 变成可序列类型
+*** python 数据模型对 python 的影响
+在 python 中定义魔法函数会对 python 的操作有影响，比如上面定义了__getitem__后，实例
+化对象可以支持切片，迭代、len()等操作，而没有定义时则会报错。
+*** 魔法函数一览
+**** 非数学运算
+***** 字符串表示
+__repr__
+__str__
+***** 集合序列相关
+__len__
+__getitem__
+__setitem__
+__delitem__
+__contains__
+***** 迭代相关
+__iter__
+__next__
+***** 可调用
+__call__
+***** with 上下文管理器
+__enter__
+__exit__
+***** 数值替换
+__abs__
+__bool__
+__init__
+__float__
+__hash__
+__index__
+***** 元类相关
+__new__
+__init__
+***** 属性相关
+__getattr__
+__setattr__
+__getattribute__
+__setattribute__
+__dir__
+***** 属性描述符
+__get__
+__set__
+__delete__
+***** 协程
+__awaite__
+__aiter__
+__anext__
+__aenter__
+__aexit__
+** 深入类和对象
+*** 鸭子类型和多态
+#+BEGIN_SRC python
+  class Cat(object):
+      def say(self):
+          print("i am a cat")
+
+  class Dog(object):
+      def say(self):
+          print("i am a fish")
+
+  class Company(object):
+      def __init__(self, employee_list):
+          self.employee = employee_list
+
+      def __getitem__(self, item):
+          return self.employee[item]
+
+      def __len__(self):
+          return len(self.employee)
+
+  company = Company(["tom", "bob", "jane"])
+
+  class Duck(object):
+      def say(self):
+          print("i am a duck")
+
+  animal_list = [Cat, Dog, Duck]
+  for animal in animal_list:
+      animal().say()
+
+
+  dog = Dog()
+  a = ["bobby1", "bobby2"]
+
+  b = ["bobby2", "bobby"]
+  name_tuple = ["bobby3", "bobby4"]
+  name_set = set()
+  name_set.add("bobby5")
+  name_set.add("bobby6")
+  a.extend(dog)
+  print(a)
+#+END_SRC
+extend 方法传递一个可迭代对象，可以是 list、tuple、set、只因为他们内部有共同的方
+法实现了可迭代类型，他们就是可以被 extend 的，就是鸭子类型。
+*** 抽象基类（abc 模块）
+ #+BEGIN_SRC python
+   #我们去检查某个类是否有某种方法
+   class Company(object):
+       def __init__(self, employee_list):
+           self.employee = employee_list
+
+       def __len__(self):
+           return len(self.employee)
+
+
+   com = Company(["bobby1","bobby2"])
+   print(hasattr(com, "__len__"))
+
+
+   class A:
+       pass
+
+   class B:
+       pass
+
+   #我们在某些情况之下希望判定某个对象的类型
+   from collections.abc import Sized
+   isinstance(com, Sized)
+
+   b = B()
+   print(isinstance(b, A))
+   # print(len(com))
+
+   #我们需要强制某个子类必须实现某些方法
+   #实现了一个 web 框架，集成 cache(redis, cache, memorychache)
+   #需要设计一个抽象基类， 指定子类必须实现某些方法
+
+   #如何去模拟一个抽象基类
+
+   import abc
+   from collections.abc import *
+
+
+   class CacheBase(metaclass=abc.ABCMeta):
+       @abc.abstractmethod
+       def get(self, key):
+           pass
+
+       @abc.abstractmethod
+       def set(self, key, value):
+           pass
+   # class CacheBase():
+   #     def get(self, key):
+   #         raise NotImplementedError
+   #     def set(self, key, value):
+   #         raise NotImplementedError
+   #
+   class RedisCache(CacheBase):
+       def set(self, key, value):
+           pass
+
+   # redis_cache = RedisCache()
+   # redis_cache.set("key", "value")
+ #+END_SRC
+平时并不推荐使用抽象基类，应该更好的利用 python 的鸭子类型，和 mixin 继承方式
+*** isinstance 和 type 的区别
+#+BEGIN_SRC python
+  class A:
+      pass
+
+  class B(A):
+      pass
+
+  b = B()
+
+  print(isinstance(b, B)) #True
+  print(isinstance(b, A)) #True
+
+  print(type(b) is B)  #True
+  print(type(b) is A)  #False
+
+  # isinstance 检查继承关系，type 检查数据类型
+#+END_SRC
+*** 类变量和实例变量的区别
+#+BEGIN_SRC python
+  class A:
+      aa = 1
+      def __init__(self, x, y):
+          self.x = x
+          self.y = y
+
+  a = A(2,3)
+
+  A.aa = 11
+  a.aa = 100 # 此时是实例变量增加了一个 aa 变量并不是改变了类变量 aa 中的值。
+  print(a.x, a.y, a.aa) #2,3,100 #如果实例的 aa 变量没有赋值的话，会向上查找类变量 aa 的值此时返回 11
+  print(A.aa) # 11
+
+  b = A(3,5)
+  print(b.aa) # 11
+
+
+#+END_SRC
+*** 静态方法类方法以及实例方法以及参数
+ #+BEGIN_SRC python
+   class Date:
+       #构造函数
+       def __init__(self, year, month, day):
+           self.year = year
+           self.month = month
+           self.day = day
+
+       def tomorrow(self):
+           self.day += 1
+
+       @staticmethod #当我们需要处理一些和实例方法和实例参数无关的逻辑时（就是可以在类外面处理的）
+ # 为了方便组织代码，把他移到类的内部，使用静态方法
+       def parse_from_string(date_str):
+           year, month, day = tuple(date_str.split("-"))
+           return Date(int(year), int(month), int(day))
+
+       @staticmethod
+       def valid_str(date_str):
+           year, month, day = tuple(date_str.split("-"))
+           if int(year)>0 and (int(month) >0 and int(month)<=12) and (int(day) >0 and int(day)<=31):
+               return True
+           else:
+               return False
+
+       @classmethod #避免实例方法中的类的硬解码传递一个类的参数
+       def from_string(cls, date_str):
+           year, month, day = tuple(date_str.split("-"))
+           return cls(int(year), int(month), int(day))
+
+       def __str__(self):
+           return "{year}/{month}/{day}".format(year=self.year, month=self.month, day=self.day)
+
+   if __name__ == "__main__":
+       new_day = Date(2018, 12, 31)
+       new_day.tomorrow()
+       print(new_day)
+
+       #2018-12-31
+       date_str = "2018-12-31"
+       year, month, day = tuple(date_str.split("-"))
+       new_day = Date(int(year), int(month), int(day))
+       print (new_day)
+
+       #用 staticmethod 完成初始化
+       new_day = Date.parse_from_string(date_str)
+       print (new_day)
+
+       #用 classmethod 完成初始化
+       new_day = Date.from_string(date_str)
+       print(new_day)
+
+       print(Date.valid_str("2018-12-32"))
+ #+END_SRC
+*** python 类的私有属性
+ python 用双下划线隐藏私有变量，其实内部转换为_classname__attr.
+*** python 的自省机制
+ #+BEGIN_SRC python
+   #自省是通过一定的机制查询到对象的内部结构
+   from chapter04.class_method import Date
+   class Person:
+       """
+       人
+       """
+       name = "user"
+
+   class Student(Person):
+       def __init__(self, scool_name):
+           self.scool_name = scool_name
+
+   if __name__ == "__main__":
+       user = Student("慕课网")
+
+       通过__dict__查询属性
+       print(user.__dict__)
+       user.__dict__["school_addr"] = "北京市"
+       print(user.school_addr)
+       print(Person.__dict__) #类的属性比实例属性多 而使用 dir 更加强大
+       print(user.name)
+       a = [1,2]
+       print(dir(a))
+ #+END_SRC
+*** super 真的是调用父类吗？
+ #+BEGIN_SRC python
+   # from threading import Thread
+   # class MyThread(Thread):
+   #     def __init__(self, name, user):
+   #         self.user = user
+   #         super().__init__(name=name)
+
+   #既然我们重写 B 的构造函数， 为什么还要去调用 super？
+   #super 到底执行顺序是什么样的？
+
+   class A:
+       def __init__(self):
+           print ("A")
+
+   class B(A):
+       def __init__(self):
+           print ("B")
+           super().__init__()
+
+   class C(A):
+       def __init__(self):
+           print ("C")
+           super().__init__() # 如果注释掉这行结果是 D,B,A 吗？结果是 D,B,C
+
+   class D(B, C):
+       def __init__(self):
+           print ("D")
+           super(D, self).__init__()
+
+   # if __name__ == "__main__":
+   print(D.__mro__) #查看 mro 顺序
+   d = D()
+
+   In [3]: (<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, 
+ <class '__main__.A'>, <class 'object'>)
+   D
+   B
+   C
+   A
+ # super 调用的其实不是严格意义上的父类 而是以 mro 顺序去查找
+ #+END_SRC
+*** python 中的 mixin
+*** python 中的 with 语句
+ #+BEGIN_SRC python
+   #try except finally
+   def exe_try():    #关于 try except, finally 的 return 问题 按执行顺序一次把 return 结果
+       try:          # 压入栈中最后取栈顶的结果
+           print ("code started")
+           raise KeyError
+           return 1
+       except KeyError as e:
+           print ("key error")
+           return 2
+       else:  # 当异常不触发是 执行 else 语句
+           print ("other error")
+           return 3
+       finally:
+           print ("finally")
+           # return 4
+
+   #上下文管理器协议
+   class Sample:
+       def __enter__(self):
+           print ("enter")
+           #获取资源
+           return self
+       def __exit__(self, exc_type, exc_val, exc_tb):
+           #释放资源
+           print ("exit")
+       def do_something(self):
+           print ("doing something")
+
+   with Sample() as sample:
+       sample.do_something()
+
+   # if __name__ == "__main__":
+   #     result = exe_try()
+   #     print (result)
+ #+END_SRC
+*** 使用 contextlib 简化上下文管理器
+ #+BEGIN_SRC python
+   import contextlib
+
+   @contextlib.contextmanager
+   def file_open(file_name):
+       print ("file open") 类似__enter__
+       yield {}
+       print ("file end")  类似__exit__
+
+   with file_open("bobby.txt") as f_opened:
+       print ("file processing")
+
+ #+END_SRC
+** 自定义序列类 
+*** 序列类型分类
+**** 容器序列 (list, tuple, deque)
+**** 扁平序列 (str, bytes, bytearray, array.array)
+**** 可变序列 (list, deque, bytearray, arry)
+**** 不可变序列 (str, tuple, bytes)
+*** list 中的 + += extend append 的区别
+#+BEGIN_SRC python
+  my_list = []
+  my_list.append(1)
+  my_list.append("a")
+
+  from collections import abc
+
+  a = [1,2]
+  c = a + [3,4]   #只能是同一个类型的对象
+
+  #就地加
+  # a += (3,4) #实现的是 extend 方法 传递一个可迭代对象
+  # 
+  # a.extend(range(3))
+
+  a.append((1,2)) # append 的是什么就相当于一个元素加入 list
+  print(a)
+#+END_SRC
+*** 实现可切片的对象
+#+BEGIN_SRC python
+  import numbers
+  class Group:    # 在 collection abc 中找到不可变序列的抽象基类 重写函数
+      #支持切片操作
+      def __init__(self, group_name, company_name, staffs):
+          self.group_name = group_name
+          self.company_name = company_name
+          self.staffs = staffs
+
+      def __reversed__(self):
+          self.staffs.reverse()
+
+      def __getitem__(self, item):
+          cls = type(self)
+          if isinstance(item, slice):
+              return cls(group_name=self.group_name, company_name=self.company_name, staffs=self.staffs[item])
+          elif isinstance(item, numbers.Integral):
+              return cls(group_name=self.group_name, company_name=self.company_name, staffs=[self.staffs[item]])
+
+      def __len__(self):
+          return len(self.staffs)
+
+      def __iter__(self):
+          return iter(self.staffs)
+
+      def __contains__(self, item):
+          if item in self.staffs:
+              return True
+          else:
+              return False
+
+  staffs = ["bobby1", "imooc", "bobby2", "bobby3"]
+  group = Group(company_name="imooc", group_name="user", staffs=staffs)
+  reversed(group)
+  for user in group:
+      print(user)
+#+END_SRC
+*** bisect 维护已排序序列
+#+BEGIN_SRC python
+  import bisect
+  from collections import deque
+
+  #用来处理已排序的序列，用来维持已排序的序列， 升序
+  #二分查找
+  inter_list = deque()
+  bisect.insort(inter_list, 3)
+  bisect.insort(inter_list, 2)
+  bisect.insort(inter_list, 5)
+  bisect.insort(inter_list, 1)
+  bisect.insort(inter_list, 6)
+
+  print(bisect.bisect_left(inter_list, 3))
+  #学习成绩
+  print(inter_list)
+#+END_SRC
+*** 什么时候应该使用列表，什么时候不使用列表
+#+BEGIN_SRC python
+  # array, deque
+  # 数组
+  import array
+  #array 和 list 的一个重要区别，array 只能存放指定的数据类型
+  my_array = array.array("i")
+  my_array.append(1)
+  my_array.append("abc")
+#+END_SRC
+*** 列表推导式，生成器，字典推导式
+** 深入 python 的 set 和 dict
+*** dict 常用方法
+#+BEGIN_SRC python
+  a = {"bobby1":{"company":"imooc"},
+       "bobby2": {"company": "imooc2"}
+       }
+  #clear
+  # a.clear()
+  # pass
+
+  #copy, 返回浅拷贝
+  new_dict = a.copy()
+  new_dict["bobby1"]["company"] = "imooc3"
+
+  #formkeys
+  new_list = ["bobby1", "bobby2"]
+
+  new_dict = dict.fromkeys(new_list, {"company":"imooc"})
+
+  new_dict.update((("bobby","imooc"),)) #创建字典神器， 传入可迭代对象 可以传键值
+#+END_SRC
+*** dict 子类
+#+BEGIN_SRC python
+  #不建议继承 list 和 dict
+  class Mydict(dict):
+      def __setitem__(self, key, value):
+          super().__setitem__(key, value*2)
+
+  my_dict = Mydict(one=1)
+  my_dict["one"] = 1
+  print (my_dict)
+
+  from collections import UserDict
+
+  class Mydict(UserDict):
+      def __setitem__(self, key, value):
+          super().__setitem__(key, value*2)
+
+  my_dict = Mydict(one=1)
+  # my_dict["one"] = 1
+  print (my_dict)
+
+  from collections import defaultdict
+
+  my_dict = defaultdict(dict)
+  my_value = my_dict["bobby"]
+  pass
+#+END_SRC
+*** set 和 frozenset
+#+BEGIN_SRC python
+  #set 集合 fronzenset (不可变集合) 无序， 不重复
+  # s = set('abcdee')
+  # s = set(['a','b','c','d','e'])
+  s = {'a','b', 'c'}
+  # s = frozenset("abcde") #frozenset 可以作为 dict 的 key
+  # print(s)
+
+  #向 set 添加数据
+  another_set = set("cef")
+  re_set = s.difference(another_set)
+  re_set = s - another_set
+  re_set = s & another_set
+  re_set = s | another_set
+
+  #set 性能很高
+  # | & -  #集合运算
+  print(re_set)
+
+  print (s.issubset(re_set))
+  # if "c" in re_set:
+  #     print ("i am in set")
+#+END_SRC
+*** dict 和 set 实现原理
+#+BEGIN_SRC python
+
+  from random import randint
+
+
+  def load_list_data(total_nums, target_nums):
+      """
+      从文件中读取数据，以 list 的方式返回
+      :param total_nums: 读取的数量
+      :param target_nums: 需要查询的数据的数量
+      """
+      all_data = []
+      target_data = []
+      file_name = "G:/慕课网课程/AdvancePython/fbobject_idnew.txt"
+      with open(file_name, encoding="utf8", mode="r") as f_open:
+          for count, line in enumerate(f_open):
+              if count < total_nums:
+                  all_data.append(line)
+              else:
+                  break
+
+      for x in range(target_nums):
+          random_index = randint(0, total_nums)
+          if all_data[random_index] not in target_data:
+              target_data.append(all_data[random_index])
+              if len(target_data) == target_nums:
+                  break
+
+      return all_data, target_data
+
+  def load_dict_data(total_nums, target_nums):
+      """
+      从文件中读取数据，以 dict 的方式返回
+      :param total_nums: 读取的数量
+      :param target_nums: 需要查询的数据的数量
+      """
+      all_data = {}
+      target_data = []
+      file_name = "G:/慕课网课程/AdvancePython/fbobject_idnew.txt"
+      with open(file_name, encoding="utf8", mode="r") as f_open:
+          for count, line in enumerate(f_open):
+              if count < total_nums:
+                  all_data[line] = 0
+              else:
+                  break
+      all_data_list = list(all_data)
+      for x in range(target_nums):
+          random_index = randint(0, total_nums-1)
+          if all_data_list[random_index] not in target_data:
+              target_data.append(all_data_list[random_index])
+              if len(target_data) == target_nums:
+                  break
+
+      return all_data, target_data
+
+
+  def find_test(all_data, target_data):
+      #测试运行时间
+      test_times = 100
+      total_times = 0
+      import time
+      for i in range(test_times):
+          find = 0
+          start_time = time.time()
+          for data in target_data:
+              if data in all_data:
+                  find += 1
+          last_time = time.time() - start_time
+          total_times += last_time
+      return total_times/test_times
+
+
+  if __name__ == "__main__":
+      # all_data, target_data = load_list_data(10000, 1000)
+      # all_data, target_data = load_list_data(100000, 1000)
+      # all_data, target_data = load_list_data(1000000, 1000)
+
+
+      # all_data, target_data = load_dict_data(10000, 1000)
+      # all_data, target_data = load_dict_data(100000, 1000)
+      # all_data, target_data = load_dict_data(1000000, 1000)
+      all_data, target_data = load_dict_data(2000000, 1000)
+      last_time = find_test(all_data, target_data)
+
+      #dict 查找的性能远远大于 list
+      #在 list 中随着 list 数据的增大 查找时间会增大
+      #在 dict 中查找元素不会随着 dict 的增大而增大
+      print(last_time)
+
+  #1.  dict 的 key 或者 set 的值 都必须是可以 hash 的
+  #不可变对象 都是可 hash 的，str，fronzenset，tuple，自己实现的类 __hash__
+  #2. dict 的内存花销大，但是查询速度快， 自定义的对象 或者 python 内部的对象都是用 dict 包装的
+  # 3. dict 的存储顺序和元素添加顺序有关
+  # 4. 添加数据有可能改变已有数据的顺序
+#+END_SRC
+** 对象引用、可变性和垃圾回收
+*** python 中的变量是什么？
+*** python 的垃圾回收和 del
+*** 一个典型的错误
+#+BEGIN_SRC python
+  def add(a, b):
+      a += b
+      return a
+
+  class Company:
+      def __init__(self, name, staffs=[]):
+          self.name = name
+          self.staffs = staffs
+      def add(self, staff_name):
+          self.staffs.append(staff_name)
+      def remove(self, staff_name):
+          self.staffs.remove(staff_name)
+
+  if __name__ == "__main__":
+      com1 = Company("com1", ["bobby1", "bobby2"])
+      com1.add("bobby3")
+      com1.remove("bobby1")
+      print (com1.staffs)
+
+      com2 = Company("com2") #当 com2,com3 都不传递 list 参数是会默认使用 defaults 参数
+      com2.add("bobby")      #会使 com2，com3 中的数据互相影响
+      print(com2.staffs)
+
+      print (Company.__init__.__defaults__)
+
+      com3 = Company("com3")
+      com3.add("bobby5")
+      print (com2.staffs)
+      print (com3.staffs)
+      print (com2.staffs is com3.staffs)
+
+      # a = 1
+      # b = 2
+      #
+      # a = [1,2]
+      # b = [3,4]
+      #
+      # a = (1, 2)
+      # b = (3, 4)
+      #
+      # c = add(a, b)
+      #
+      # print(c)
+      # print(a, b)
+#+END_SRC
+** 元类编程
+*** property 动态属性
+*** __getattr__, __getattribute__ 区别
+#+BEGIN_SRC python
+  #__getattr__, __getattribute__
+  #__getattr__ 就是在查找不到属性的时候调用
+  from datetime import date
+  class User:
+      def __init__(self,info={}):
+          self.info = info
+
+      def __getattr__(self, item):
+          return self.info[item]
+
+      # def __getattribute__(self, item):
+      #     return "bobby"
+
+  if __name__ == "__main__":
+      user = User(info={"company_name":"imooc", "name":"bobby"})
+      print(user.test)
+#+END_SRC
+*** 属性描述符和属性查找过程
+#+BEGIN_SRC python
+  from datetime import date, datetime
+  import numbers
+
+  class IntField:
+      #数据描述符
+      def __get__(self, instance, owner):
+          return self.value
+      def __set__(self, instance, value):
+          if not isinstance(value, numbers.Integral):
+              raise ValueError("int value need")
+          if value < 0:
+              raise ValueError("positive value need")
+          self.value = value
+      def __delete__(self, instance):
+          pass
+
+
+  class NonDataIntField:
+      #非数据属性描述符
+      def __get__(self, instance, owner):
+          return self.value
+
+  class User:
+      age = IntField()
+      # age = NonDataIntField()
+
+  '''
+  如果 user 是某个类的实例，那么 user.age（以及等价的 getattr(user,’age’)）
+  首先调用__getattribute__。如果类定义了__getattr__方法，
+  那么在__getattribute__抛出 AttributeError 的时候就会调用到__getattr__，
+  而对于描述符(__get__）的调用，则是发生在__getattribute__内部的。
+  user = User(), 那么 user.age 顺序如下：
+
+  （1）如果“age”是出现在 User 或其基类的__dict__中， 且 age 是 data descriptor， 那么调用其__get__方法, 否则
+
+  （2）如果“age”出现在 user 的__dict__中， 那么直接返回 obj.__dict__[‘age’]， 否则
+
+  （3）如果“age”出现在 User 或其基类的__dict__中
+
+  （3.1）如果 age 是 non-data descriptor，那么调用其__get__方法， 否则
+
+  （3.2）返回 __dict__[‘age’]
+
+  （4）如果 User 有__getattr__方法，调用__getattr__方法，否则
+
+  （5）抛出 AttributeError
+
+  '''
+
+  # class User:
+  #
+  #     def __init__(self, name, email, birthday):
+  #         self.name = name
+  #         self.email = email
+  #         self.birthday = birthday
+  #         self._age = 0
+  #
+  #     # def get_age(self):
+  #     #     return datetime.now().year - self.birthday.year
+  #
+  #     @property
+  #     def age(self):
+  #         return datetime.now().year - self.birthday.year
+  #
+  #     @age.setter
+  #     def age(self, value):
+  #         #检查是否是字符串类型
+  #         self._age = value
+
+  if __name__ == "__main__":
+      user = User()
+      user.__dict__["age"] = "abc"
+      print (user.__dict__)
+      print (user.age)
+      # print (getattr(user, 'age'))
+      # user = User("bobby", date(year=1987, month=1, day=1))
+      # user.age = 30
+      # print (user._age)
+      # print(user.age)
+
+
+#+END_SRC
+*** __new__,__init__的区别
+#+BEGIN_SRC python
+  class User:
+      def __new__(cls, *args, **kwargs):
+          print (" in new ")
+          return super().__new__(cls)
+      def __init__(self, name):
+          print (" in init")
+          pass
+  a = int()
+  #new 是用来控制对象的生成过程， 在对象生成之前
+  #init 是用来完善对象的
+  #如果 new 方法不返回对象， 则不会调用 init 函数
+  if __name__ == "__main__":
+      user = User(name="bobby")
+#+END_SRC
+*** 自定义元类
+** python Socket 编程
+*** socket client 实现通信
+* python 语言特性
+*** python 参数的传递
+    #+BEGIN_SRC python
+      a = 1
+      def fun(a):
+          print "func_in",id(a)   # func_in 41322472
+          a = 2
+          print "re-point",id(a), id(2)   # re-point 41322448 41322448
+      print "func_out",id(a), id(1)  # func_out 41322472 41322472
+      fun(a)
+      print a  # 1
+
+
+      a = []
+      def fun(a):
+          print "func_in",id(a)  # func_in 53629256
+          a.append(1)
+      print "func_out",id(a)     # func_out 53629256
+      fun(a)
+      print a  # [1]
+    #+END_SRC
+    类型是属于对象的而不是变量,在 python 中有可更改(mutable)和不可更改对象(immutable),
+    strings,tuples,numbers 是不可更改对象, list,dict,set 是可更改的对象.
+
+    当一个引用传递给函数的时候,函数自动复制一份引用,这个函数里的引用和外边的引用没有半毛关系了.
+    所以第一个例子里函数把引用指向了一个不可变对象,当函数返回的时候,外面的引用没半毛感觉.而第二个例子就不一样了,
+    函数内的引用指向的是可变对象,对它的操作就和定位了指针地址一样,在内存里进行修改.
+
+    stackoverflow 解释 http://stackoverflow.com/questions/986006/how-do-i-pass-a-variable-by-reference
+    #+BEGIN_SRC python
+      def hello():
+          print('hello world')
+    #+END_SRC
+*** what are metaclass in python 
+**** Classes as objects
+    在你理解 metaclasses 之前,你需要 master classes in python. And python has 
+    a very peculiar idea of what classes are, 借用(borrowed) smalltalk language
+
+    In most language, classes are just pieces of code that describe how to produce a object, 
+    That's kinda true in python too:(大多数语言中, 类只是构造对象的代码块,这一点在 python 里也是对的)
+    #+BEGIN_SRC python
+      class ObjectCreator(object):
+          pass
+      my_object = ObjectCreator()
+      print(my_object)
+      <__main__.ObjectCreator object at 0x8974f2c>
+    #+END_SRC
+    but classes are more than that, classes is object too.
+
+    As soon as you use the key word class, Python executes(执行) it and creates
+    an object, the instruction(指令)
+    #+BEGIN_SRC python
+      class ObjectCreator(object):
+          pass
+    #+END_SRC
+    creates in memory(内存) an object with the name "ObjectCreator"
+
+    This object(the class) is itself capable of creating objects (the instance),
+    and this is why it's a class(这个对象(类)可以创建对象,这就是为什么它是类)
+    But still, it's an object, and therefore(因此):
+    - you can assign(分配) it to a variable(变量)
+    - you can copy it
+    - you can add attributes(属性) to it
+    - you can pass(传递) it as a function parameter(函数参数)
+
+    #+BEGIN_SRC python
+      >>> print(ObjectCreator) # you can print a class because it's an object
+      <class '__main__.ObjectCreator'>
+      >>> def echo(o):
+      ...       print(o)
+      ...
+      >>> echo(ObjectCreator) # you can pass a class as a parameter
+      <class '__main__.ObjectCreator'>
+      >>> print(hasattr(ObjectCreator, 'new_attribute'))
+      False
+      >>> ObjectCreator.new_attribute = 'foo' # you can add attributes to a class
+      >>> print(hasattr(ObjectCreator, 'new_attribute'))
+      True
+      >>> print(ObjectCreator.new_attribute)
+      foo
+      >>> ObjectCreatorMirror = ObjectCreator # you can assign a class to a variable
+      >>> print(ObjectCreatorMirror.new_attribute)
+      foo
+      >>> print(ObjectCreatorMirror())
+      <__main__.ObjectCreator object at 0x8997b4c>
+    #+END_SRC 
+**** Creating classses dynamically(动态的)
+      Since classes are objects, you can create them on the fly, like
+      any object.
+      First,you can create a class in a function using class:
+      #+BEGIN_SRC python
+        >>> def choose_class(name):
+        ...     if name == 'foo':
+        ...         class Foo(object):
+        ...             pass
+        ...         return Foo # return the class, not an instance
+        ...     else:
+        ...         class Bar(object):
+        ...             pass
+        ...         return Bar
+        ...
+        >>> MyClass = choose_class('foo')
+        >>> print(MyClass) # the function returns a class, not an instance
+        <class '__main__.Foo'>
+        >>> print(MyClass()) # you can create an object from this class
+        <__main__.Foo object at 0x89c6d4c>
+      #+END_SRC
+      But it's not so dynamic, since you still have to write the whole class youself.
+
+      Since(由于) classes are objects, the must be generated(生成) by something.
+
+      When you use the class keyword, Pyhton creates this object automatically.
+      But as with most things in Python. it gives you a way to do it manually(手动的).
+
+      Remember the function type? The good old function that lets you know what type an object is:
+      #+BEGIN_SRC python
+        >>> print(type(1))
+        <type 'int'>
+        >>> print(type("1"))
+        <type 'str'>
+        >>> print(type(ObjectCreator))
+        <type 'type'>
+        >>> print(type(ObjectCreator()))
+        <class '__main__.ObjectCreator'>
+      #+END_SRC
+      Well, type has a completely different ability, it can also create
+      classes on the fly(动态). type can take the description of a class as 
+      parameters, and return class.
+      (I know, it's silly that the same function can have two completely
+      different use according to the parameters you pass to it. it's an 
+      issue(问题) due to backwards compatibility(向后兼容) in Python)
+
+      type works this way:
+      type(name of the class,
+      tuple of hte parent class (for inheritance ,can be empty),
+      dictionary containing attributes names and values)
+ #+BEGIN_SRC python
+   >>> class MyShinyClass(object):
+   ...       pass
+   can be created manually this way:
+   >>> MyShinyClass = type('MyShinyClass', (), {}) # returns a class object
+   >>> print(MyShinyClass)
+   <class '__main__.MyShinyClass'>
+   >>> print(MyShinyClass()) # create an instance with the class
+   <__main__.MyShinyClass object at 0x8997cec>
+ #+END_SRC
+ You'll notice that we use "MyShinyClass" as the name of the class and as 
+ the variable to hold the class reference. They can be different, but 
+ there is no reason to complicate(复杂) things.
+
+ #+BEGIN_SRC python
+   type accepts a dictionary to define the attributes of the class. So:
+
+   >>> class Foo(object):
+   ...       bar = True
+   Can be translated to:
+
+   >>> Foo = type('Foo', (), {'bar':True})
+   And used as a normal class:
+
+   >>> print(Foo)
+   <class '__main__.Foo'>
+   >>> print(Foo.bar)
+   True
+   >>> f = Foo()
+   >>> print(f)
+   <__main__.Foo object at 0x8a9b84c>
+   >>> print(f.bar)
+   True
+   And of course, you can inherit from it, so:
+
+   >>>   class FooChild(Foo):
+   ...         pass
+   would be:
+
+   >>> FooChild = type('FooChild', (Foo,), {})
+   >>> print(FooChild)
+   <class '__main__.FooChild'>
+   >>> print(FooChild.bar) # bar is inherited from Foo
+   True
+   Eventually you well want to add methods to your class. Just define a function with the proper signature and assign it as an attribute.
+
+   >>> def echo_bar(self):
+   ...       print(self.bar)
+   ...
+   >>> FooChild = type('FooChild', (Foo,), {'echo_bar': echo_bar})
+   >>> hasattr(Foo, 'echo_bar')
+   False
+   >>> hasattr(FooChild, 'echo_bar')
+   True
+   >>> my_foo = FooChild()
+   >>> my_foo.echo_bar()
+   True
+   And you can add even more methods after you dynamically create the class, just like adding methods to a normally created class object.
+
+   >>> def echo_bar_more(self):
+   ...       print('yet another method')
+   ...
+   >>> FooChild.echo_bar_more = echo_bar_more
+   >>> hasattr(FooChild, 'echo_bar_more')
+   True
+ #+END_SRC
+     You see where we are going: in Python, classes are objects, and you can create a class on the fly, dynamically.
+ This is what Python does when you use the keyword class, and it does so by using a metaclass.
+**** Waht are metaclasses(finally)
+    Metaclasses are the 'stuff'(东西) that creates classes.
+    You define classes in order to create objects, right?
+    But we learned that python classes are objects.
+    Well, metaclasses are what create these objects. They are the classes'classes,
+    you can picture(表示) them this way:
+    MyClass = MetaClass()
+    my_object = MyClass()
+    You've seen that type lets you do something like this:
+    MyClass = type('MyClass', (), {})
+    It's because th(表示) them this way:
+    MyClass = MetaClass()
+    my_object = MyClass()
+    You've seen that type lets you do something like this:
+    MyClass = type('MyClass', (), {})
+    It's because the function type is in fact a metaclass. type is hte metaclass Python
+    e function type is in fact a metaclass. type is the metaclass Python uses to create 
+    all classes behind the scenes.
+
+    Now you wonder why the heck(见鬼)is it written in lowercase(小写), and not Type?
+
+    Well, I guess It's a matter of consistency with str, the class that creates strings objects,
+    and int the class that creates integer objects. type is just the class that creates class objects.
+
+    You see that by checking the __class__ attribute(属性).
+
+    Everything, and I mean everthing, is an object in Python. Thatr includes ints, string, fuctins and
+    classes. All of them are objects. And all of them have been created form class:
+    #+BEGIN_SRC python
+      >>> age = 35
+      >>> age.__class__
+      <type 'int'>
+      >>> name = 'bob'
+      >>> name.__class__
+      <type 'str'>
+      >>> def foo(): pass
+      >>> foo.__class__
+      <type 'function'>
+      >>> class Bar(object): pass
+      >>> b = Bar()
+      >>> b.__class__
+      <class '__main__.Bar'>
+    #+END_SRC
+    Now, what is the __class__ of any __class__?
+    #+BEGIN_SRC python
+      >>> age.__class__.__class__
+      <type 'type'>
+      >>> name.__class__.__class__
+      <type 'type'>
+      >>> foo.__class__.__class__
+      <type 'type'>
+      >>> b.__class__.__class__
+      <type 'type'>
+    #+END_SRC
+    So, a metaclass is just the stuff that creates class objects.
+
+    You can call it a 'call factory' if you wish.
+
+    type is the built_in metaclass Python uses, but of course, you cna create your own metaclass.
+**** The __metaclass__ attribute
+    You can add a __metaclass__ attribute when you write a class:
+    Class Foo(object):
+        __metaclass__==something...
+
+    inf you do so, Python will use the metaclass to create the class Foo.
+    Careful, It's tricky
+
+    You write class Foo(object) first, but the class object Foo is not created in memory yet.
+
+    Python will look for __metaclass__ in the class defintion. If it find it, it will use it 
+    to create the object class Foo. If doesn't, it will use type to create class.
+
+    Read that serveral times
+
+    When you do:
+
+    Class Foo(Bar):
+        pass
+
+    Python does the following:
+
+    Is there a __metaclass__ attribute in Foo?
+
+    If yes, create in memory a class object(I said a class object, stay with me here),with the names
+    Foo by using what is in __metaclass__.
+
+    If Python can't find __metaclass__, it will look for a __metaclass__ at the MODULE level, and try
+    to do the same(but only for classes that don't inherit anything, basically old-style classes).
+
+    Then if it can't find any __metaclass__ at all, ti will use the Bar's(the first parent) own metaclasses
+    (which might be the default type) to create the classs object.
+
+    Be careful here that the __metaclass__ attribute will not be inherited(继承的), the metaclass of the pareent
+    (Bar.__class__) will be. if Bar used a __metaclass__ attribute that created Bar with type()
+    (and not type.__new__()), the subclasses will not inherit that behavior.
+
+    Now the big question is, what can you pu in __metaclass__?
+
+    The answer is: something that can create a class.
+
+    And what can create a class? type, or anything that subclasses or uses it.
+**** Custom(定制) metaclasses
+ The main purpose of a metaclass is to change the class automatically, when it's created.
+
+ You usually do this for APIs, where you want to create classes matching the current(当前的) context
+
+ Imageine a stupid example, where you decide that all classes in your module should have their attributes
+ written i uppercase. There are several ways to do this, but one way is to set __metaclass__ at the 
+ module level.
+**** 总结
+    python 一起皆 object 原因是 都是类或者原类的实例
+    当用 __metaclass__ 重新元类是 子类不会继承此元类
+    stackoverflow [[https://stackoverflow.com/questions/100003/what-are-metaclasses-in-python][stackoverflow]]
+*** What is the difference between @stacmethod and @classmethod in Python?
+    Maybe a bit of example code will help: Notice the difference in the call signatures
+    of foo, class_foo and static_foo:
+    #+BEGIN_SRC python
+      class A(object):
+          def foo(self,x):
+              print "executing foo(%s,%s)"%(self,x)
+
+          @classmethod
+          def class_foo(cls,x):
+              print "executing class_foo(%s,%s)"%(cls,x)
+
+          @staticmethod
+          def static_foo(x):
+              print "executing static_foo(%s)"%x    
+      a=A()
+    #+END_SRC
+    Below is the usual way an object instance calls method. The object instance, a, is implicitly(隐藏)
+    passed as the first argument:
+
+    # a.foo(1)
+    # executing foo(<__main__.A object at 0xb7dbef0c>,1)
+    With classmethods, the class of the object instance is implicitly passed as the first argument instead of self.
+
+    # a.class_foo(1)
+    # executing class_foo(<class '__main__.A'>,1)
+    You can also call class_foo using the class. In fact, if you define something to be a classmethod, it is probably because you intend to call it from the class rather than from a class instance. A.foo(1) would have raised a TypeError, but A.class_foo(1) works just fine:
+
+    # A.class_foo(1)
+    # executing class_foo(<class '__main__.A'>,1)
+    One use people have found for class methods is to create inheritable alternative constructors.
+
+    With staticmethods, neither self (the object instance) nor  cls (the class) is implicitly passed as the first argument. They behave like plain functions except that you can call them from an instance or the class:
+
+    # a.static_foo(1)
+    # executing static_foo(1)
+
+    # A.static_foo('hi')
+    # executing static_foo(hi)
+    Staticmethods are used to group functions which have some logical connection with a class to the class.
+
+    foo is just a function, but when you call a.foo you don't just get the function, you get a "partially applied" version of the function with the object instance a bound as the first argument to the function. foo expects 2 arguments, while a.foo only expects 1 argument.
+
+    a is bound to foo. That is what is meant by the term "bound" below:
+
+    # print(a.foo)
+    # <bound method A.foo of <__main__.A object at 0xb7d52f0c>>
+    With a.class_foo, a is not bound to class_foo, rather the class A is bound to class_foo.
+
+    # print(a.class_foo)
+    # <bound method type.class_foo of <class '__main__.A'>>
+    Here, with a staticmethod, even though it is a method, a.static_foo just returns a good 'ole function with no arguments bound. static_foo expects 1 argument, and a.static_foo expects 1 argument too.
+
+    # print(a.static_foo)
+    # <function static_foo at 0xb7d479cc>
+    And of course the same thing happens when you call static_foo with the class A instead.
+
+    # print(A.static_foo)
+    # <function static_foo at 0xb7d479cc>
+*** python 类变量和实例变量
+     类变量：
+
+     ​	是可在类的所有实例之间共享的值（也就是说，它们不是单独分配给每个实例的）。例如下例中，num_of_instance 就是类变量，用于跟踪存在着多少个 Test 的实例。
+
+     实例变量：
+
+     实例化之后，每个实例单独拥有的变量。
+     #+BEGIN_SRC python
+     class Test(object):  
+         num_of_instance = 0  
+         def __init__(self, name):  
+             self.name = name  
+             Test.num_of_instance += 1  
+
+     if __name__ == '__main__':  
+         print Test.num_of_instance   # 0
+         t1 = Test('jack')  
+         print Test.num_of_instance   # 1
+         t2 = Test('lucy')  
+         print t1.name , t1.num_of_instance  # jack 2
+         print t2.name , t2.num_of_instance  # lucy 2
+     #+END_SRC
+
+     补充的例子
+     #+BEGIN_SRC python
+     class Person:
+         name="aaa"
+
+     p1=Person()
+     p2=Person()
+     p1.name="bbb"
+     print p1.name  # bbb
+     print p2.name  # aaa
+     print Person.name  # aaa
+     #+END_SRC
+     这里 p1.name="bbb"是实例调用了类变量,这其实和上面第一个问题一样,就是函数传参的问题,p1.name 一开始是指向的类变量 name="aaa",但是在实例的作用域里把类变量的引用改变了,就变成了一个实例变量,self.name 不再引用 Person 的类变量 name 了.
+
+     可以看看下面的例子:
+     #+BEGIN_SRC python
+     class Person:
+         name=[]
+
+     p1=Person()
+     p2=Person()
+     p1.name.append(1)
+     print p1.name  # [1]
+     print p2.name  # [1]
+     print Person.name  # [1]
+     #+END_SRC
+ 总结
+ 1、类变量可以使用 className.类变量和 self.类变量两种方式访问。
+ 2、如果使用 self.类变量的方式访问并重新赋值后，这个变量就会成为实例变量和 self 绑定，实际上就变成了一个实例变量，实例变量会屏蔽掉类变量的值。
+ 3、类变量是共享的，最好使用类名的方式来访问类变量。
+ 4、类变量通过 self 访问时，就会被转化成实例变量，被绑定到特定的实例上。
+ 5、实例变量(self)的形式对类变量重新赋值后，类变量的值不会随之变化。
+ 6、实例变量对每一个对象是不可见的，每一个对象拥有着可能不同的值。
+*** python 自省
+    自省就是面向对象的语言所写的程序在运行时,所能知道对象的类型.简单一句就是运行时能够获得对象的类型.比如 type(),dir(),getattr(),hasattr(),isinstance().
+    #+BEGIN_SRC python
+    a = [1,2,3]
+    b = {'a':1,'b':2,'c':3}
+    c = True
+    print type(a),type(b),type(c) # <type 'list'> <type 'dict'> <type 'bool'>
+    print isinstance(a,list)  # True
+    #+END_SRC
+    详细信息参见 [[https://blog.csdn.net/longerzone/article/details/17913117][python 自省]]
+*** What does the 'yield' keyword do?
+**** Iterables
+ To understand what yield does, you must understand what generators(生成器)
+are. And befor generators come iterables(迭代)
+#+BEGIN_SRC python
+>>> mylist = [1, 2, 3]
+>>> for i in mylist:
+...    print(i)
+1
+2
+3
+#+END_SRC
+mylist is an iterable. When you use a list comprehension, you create a list,
+and so an iterable.
+#+BEGIN_SRC python  
+>>> mylist = [x*x for x in range(3)]
+>>> for i in mylist:
+...    print(i)
+0
+1
+4
+#+END_SRC
+ Everything you can use 'for ... in ..' on is an iterable; lists, strings, files...
+
+ These iterables are handy because you can read them as much as you wish, but you 
+ store all the values in memory and this is not always what you want when you have a lot of values.
+**** Generators
+Generators are iterators, a kind of iterable you can only iterate over once.
+Generators do not store all the values in memory, they generate the values
+on the fly:
+#+BEGIN_SRC python
+>>> mygenerator = (x*x for x in range(3))
+>>> for i in mygenerator:
+...    print(i)
+0
+1
+4
+#+END_SRC
+It is just the same except you used () instead of []. BUT, you cannot perform
+for i in mygenerator a second time since generators can only be used once:
+they calculate 0, then forget about it and calculate 1, and end calculating
+4, one by one.
+**** Yield
+yield is a keyworkd that is used like reutrn, except the function will returns
+a generator.
+#+BEGIN_SRC python
+>>> def createGenerator():
+...    mylist = range(3)
+...    for i in mylist:
+...        yield i*i
+...
+>>> mygenerator = createGenerator() # create a generator
+>>> print(mygenerator) # mygenerator is an object!
+<generator object createGenerator at 0xb7555c34>
+>>> for i in mygenerator:
+...     print(i)
+0
+1
+4
+#+END_SRC
+Here it's a useless example, but it's handy when you know your function will
+return a huge set of values that you will only need to read once.
+
+To master(掌握) yield, you must understand that when you call the function, 
+the code you have written in the function body does not run. The functions only
+returns the generator object, this is a bit tricky(棘手) :-)
+
+Then, your code will be run each time the for uses the generator.
+
+Now the hard part:
+
+The first time the for calls the generator object created from your function,
+it will run the code in your funtion from the beginning until it hits yield,
+the it'll return the first value of the loop. then, each other call will run
+the loop you have written in the function one more tiem, and return the next
+value , until htere in not value to return.
+
+The generator is considered empty once the function runs, but does not hit
+yield anymore. It can be because the loop had come to and end, or because yo do
+not satisfy an 'if/else' anymore
+
+[[https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do][stackoverflow]]
+*** 字典生成器
+*** What is the meaning of single_ and double_underscore
+Names, in a class, with leading underscore are simply to indicate(表明) to
+other porgrammers that the attribute or method is intended to be private.
+However, nothing special is done with the name itself.
+
+PEP-8
+_single_leading_underscore: weak"internal use" indicator. E.g from M import *
+does not import objects whose name starts with an und 
+
+Double Underscore(Name Mangling)
+
+From the Python docs:
+Any identifier of the form __spam(at least two leading underscores, at most one
+trailing underscore) is textually replaced withye _classname__spam, where
+classname is the current class name withe leading underscore(s) stipped, This
+mangling is done withdout regrad to the syntactic position of the identifier,
+so it can be used to define class-private instance and class variables,
+methods, variables gtored in globals, and even variables stored in instances.
+private to this class on instances of other classes.
+
+And a warning from the same page:
+
+Name mangling is intended to give classes and easy way to define "private"
+instance variables defined by derived classes, or mucking with instance
+variables by code outside the class. Note that the mangling urles are designed
+mostly to avoid accidents; it still is possible for a determined soul to access
+or modify a variable that is considered private.
+
+Example
+#+BEGIN_SRC python
+>>> class MyClass():
+...     def __init__(self):
+...             self.__superprivate = "Hello"
+...             self._semiprivate = ", world!"
+...
+>>> mc = MyClass()
+>>> print mc.__superprivate
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: myClass instance has no attribute '__superprivate'
+>>> print mc._semiprivate
+, world!
+>>> print mc.__dict__
+{'_MyClass__superprivate': 'Hello', '_semiprivate': ', world!'}
+#+END_SRC
+*** format 高级用法
+    #+BEGIN_SRC python
+tu = (12,45,22222,103,6)
+print '{0} {2} {1} {2} {3} {2} {4} {2}'.format(*tu)
+
+li = [12,45,78,784,2,69,1254,4785,984]
+print map('the number is {}'.format,li)   
+
+
+from datetime import datetime,timedelta
+
+once_upon_a_time = datetime(2010, 7, 1, 12, 0, 0)
+delta = timedelta(days=13, hours=8,  minutes=20)
+
+gen =(once_upon_a_time +x*delta for x in xrange(20))
+
+print '\n'.join(map('{:%Y-%m-%d %H:%M:%S}'.format, gen))
+    
+
+['the number is 12', 'the number is 45', 'the number is 78',
+'the number is 784', 'the number is 2', 'the number is 69',
+'the number is 1254', ' the number is 4785', 'the number is 984'] 
+2010-07-01 12:00:00
+2010-07-14 20:20:00
+2010-07-28 04:40:00
+2010-08-10 13:00:00
+2010-08-23 21:20:00
+2010-09-06 05:40:00
+2010-09-19 14:00:00
+2010-10-02 22:20:00
+2010-10-16 06:40:00
+2010-10-29 15:00:00
+2010-11-11 23:20:00
+2010-11-25 07:40:00
+2010-12-08 16:00:00
+2010-12-22 00:20:00
+2011-01-04 08:40:00
+2011-01-17 17:00:00
+2011-01-31 01:20:00
+2011-02-13 09:40:00
+2011-02-26 18:00:00
+2011-03-12 02:20:00
+    #+END_SRC
+*** Decorator Basics
+**** Python's functions are objects
+To understand decorators, you must first understand that functions are objects
+in Python. This had import consequences. Let's see why with a simple example:
+#+BEGIN_SRC python
+def shout(word="yes"):
+    return word.capitalize()+"!"
+
+print(shout())
+# outputs : 'Yes!'
+
+# As an object, you can assign the function to a variable like any other object 
+scream = shout
+
+# Notice we don't use parentheses: we are not calling the function,
+# we are putting the function "shout" into the variable "scream".
+# It means you can then call "shout" from "scream":
+
+print(scream())
+# outputs : 'Yes!'
+
+# More than that, it means you can remove the old name 'shout',
+# and the function will still be accessible from 'scream'
+
+del shout
+try:
+    print(shout())
+except NameError, e:
+    print(e)
+    #outputs: "name 'shout' is not defined"
+
+print(scream())
+# outputs: 'Yes!
+#+END_SRC
+Keep this in mind. Well'll circle back to it shortly
+
+Another interesting property of Python functions is they can be defined inside
+another fuction!
+#+BEGIN_SRC python
+def talk():
+
+    # You can define a function on the fly in "talk" ...
+    def whisper(word="yes"):
+        return word.lower()+"..."
+
+    # ... and use it right away!
+    print(whisper())
+
+# You call "talk", that defines "whisper" EVERY TIME you call it, then
+# "whisper" is called in "talk". 
+talk()
+# outputs: 
+# "yes..."
+
+# But "whisper" DOES NOT EXIST outside "talk":
+
+try:
+    print(whisper())
+except NameError, e:
+    print(e)
+    #outputs : "name 'whisper' is not defined"*
+    #Python's functions are objects
+#+END_SRC
+**** Functions references
+
+Okay, still here? Now the fun part...
+
+You've seen that functions are objects. Therefore, functions:
+-- can be assiged to a variables
+-- can be defined in another functions
+
+That means that a fuction can return another function.
+
+#+BEGIN_SRC python
+def getTalk(kind="shout"):
+
+    # We define functions on the fly
+    def shout(word="yes"):
+        return word.capitalize()+"!"
+
+    def whisper(word="yes") :
+        return word.lower()+"...";
+
+    # Then we return one of them
+    if kind == "shout":
+        # We don't use "()", we are not calling the function,
+        # we are returning the function object
+        return shout  
+    else:
+        return whisper
+
+# How do you use this strange beast?
+
+# Get the function and assign it to a variable
+talk = getTalk()      
+
+# You can see that "talk" is here a function object:
+print(talk)
+#outputs : <function shout at 0xb7ea817c>
+
+# The object is the one returned by the function:
+print(talk())
+#outputs : Yes!
+
+# And you can even use it directly if you feel wild:
+print(getTalk("whisper")())
+#outputs : yes...
+#+END_SRC
+
+There's more!
+
+If you can retur a function, you can pass one as a parameter:
+#+BEGIN_SRC python
+def doSomethingBefore(func): 
+    print("I do something before then I call the function you gave me")
+    print(func())
+
+doSomethingBefore(scream)
+#outputs: 
+#I do something before then I call the function you gave me
+#Yes!
+#+END_SRC
+
+Well, you just have everything needed to understand decorators, You see,
+decorators are "wrappers", which means that they let you execute code before
+and after the function they decorate without modifying the function itself.
+**** Handcrafted decorators
+How you'd do it manually:
+
+#+BEGIN_SRC python
+# A decorator is a function that expects ANOTHER function as parameter
+def my_shiny_new_decorator(a_function_to_decorate):
+
+    # Inside, the decorator defines a function on the fly: the wrapper.
+    # This function is going to be wrapped around the original function
+    # so it can execute code before and after it.
+    def the_wrapper_around_the_original_function():
+
+        # Put here the code you want to be executed BEFORE the original function is called
+        print("Before the function runs")
+
+        # Call the function here (using parentheses)
+        a_function_to_decorate()
+
+        # Put here the code you want to be executed AFTER the original function is called
+        print("After the function runs")
+
+    # At this point, "a_function_to_decorate" HAS NEVER BEEN EXECUTED.
+    # We return the wrapper function we have just created.
+    # The wrapper contains the function and the code to execute before and after. It’s ready to use!
+    return the_wrapper_around_the_original_function
+
+# Now imagine you create a function you don't want to ever touch again.
+def a_stand_alone_function():
+    print("I am a stand alone function, don't you dare modify me")
+
+a_stand_alone_function() 
+#outputs: I am a stand alone function, don't you dare modify me
+
+# Well, you can decorate it to extend its behavior.
+# Just pass it to the decorator, it will wrap it dynamically in 
+# any code you want and return you a new function ready to be used:
+
+a_stand_alone_function_decorated = my_shiny_new_decorator(a_stand_alone_function)
+a_stand_alone_function_decorated()
+#outputs:
+#Before the function runs
+#I am a stand alone function, don't you dare modify me
+#After the function runs
+#+END_SRC
+
+Now, you probably want that every time you call a_stand_alone_function,
+a_stand_alone_function_decorated is called instead. That's easy, just
+overwwrite a_satnd_alone_function with the function retur ed by
+my_shiny_new_+decorator: 
+
+#+BEGIN_SRC python
+a_stand_alone_function = my_shiny_new_decorator(a_stand_alone_function)
+a_stand_alone_function()
+#outputs:
+#Before the function runs
+#I am a stand alone function, don't you dare modify me
+#After the function runs
+
+# That’s EXACTLY what decorators do!
+#+END_SRC
+**** Decorators demystified
+The previous example, using the decorator syntax:
+#+BEGIN_SRC python
+@my_shiny_new_decorator
+def another_stand_alone_function():
+    print("Leave me alone")
+
+another_stand_alone_function()  
+#outputs:  
+#Before the function runs
+#Leave me alone
+#After the function runs
+#+END_SRC
+
+Yes, that's all, it's that simple. @decorator is just a shortcut to:
+another_stand_alone_function =
+my_shiny_newdecorator(another_stand_alone_function) 
+
+Decorators are just a pythonic variant of the decorator design pattern. There
+are several classic desing patterns embedded in Python ot ease development(like
+iterators). 
+
+Of course, yhou can anccumulate decorators:
+#+BEGIN_SRC python
+def bread(func):
+    def wrapper():
+        print("</''''''\>")
+        func()
+        print("<\______/>")
+    return wrapper
+
+def ingredients(func):
+    def wrapper():
+        print("#tomatoes#")
+        func()
+        print("~salad~")
+    return wrapper
+
+def sandwich(food="--ham--"):
+    print(food)
+
+sandwich()
+#outputs: --ham--
+sandwich = bread(ingredients(sandwich))
+sandwich()
+#outputs:
+#</''''''\>
+# #tomatoes#
+# --ham--
+# ~salad~
+#<\______/>
+Using the Python decorator syntax:
+
+@bread
+@ingredients
+def sandwich(food="--ham--"):
+    print(food)
+
+sandwich()
+#outputs:
+#</''''''\>
+# #tomatoes#
+# --ham--
+# ~salad~
+#<\______/>
+The order you set the decorators MATTERS:
+
+@ingredients
+@bread
+def strange_sandwich(food="--ham--"):
+    print(food)
+
+strange_sandwich()
+#outputs:
+##tomatoes#
+#</''''''\>
+# --ham--
+#<\______/>
+# ~salad~
+#+END_SRC
+**** Taking decorators to the next level
+*** 单例模式
+[[http://python.jobbole.com/87294/][单例模式]]
+*** Does Python have a ternary(三元) conditional operator?
+The syntax is:
+a if condition else b
+
+Frist condition is evaluated, the either a or b is returned based on the
+Boolean value of condition 
+If condition evaluates to Rrue a is returned, else b is returned.
+
+For example:
+#+BEGIN_SRC python
+  'true' if True else 'false'
+  'true'
+  'true' if False else 'false'
+  'false'
+#+END_SRC
+
+Note that conditionals are an expression, not a statement. This means you can't
+use assignments or pass or other statemetns in conditional:
+
+#+BEGIN_SRC python
+>>> pass if False else x = 3
+  File "<stdin>", line 1
+    pass if False else x = 3
+          ^
+SyntaxError: invalid syntax
+#+END_SRC
+In such a case, you have to use a normal if statement instead of a conditional.
+*** 合并两个字典
+https://segmentfault.com/a/1190000010567015
+*** 深 copy 和浅 copy 的区别

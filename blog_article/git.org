@@ -1,5 +1,5 @@
 * git 操作总结
-前些时间用git操作经常出现一些莫名其妙的问题，对其中一些命令也不知道相互的关系，
+前些时间用 git 操作经常出现一些莫名其妙的问题，对其中一些命令也不知道相互的关系，
 为了弄清楚之间的联系，想深入了解一下并做此记录
 ** 初始化
 *** 初始化版本库
@@ -7,14 +7,14 @@ git init (会在根目录下生成.git 文件）
 *** 设置忽略文件
 **** 设置每个人都生效的忽略文件 
 1. 在根目录下新建一个.gitignore 的文件
-2. 在命令行中执行 echo *.ptxt>.gitignore (>左右不要有空格）也可以用vim手动添加
+2. 在命令行中执行 echo *.ptxt>.gitignore (>左右不要有空格）也可以用 vim 手动添加
 3. 将.gitignore 文件加入版本库提交
 **** 设置对自己生效的忽略文件
 修改 .git/info/exclude 文件 可使用正则表达式 例如：*.[oa] 等价与*.a 和*.o
 *** 添加文件到版本库
 **** 添加单个文件 
 git add newfile.txt
-**** 添加所有txt文件
+**** 添加所有 txt 文件
 git add *.txt
 **** 添加所有文件
 git add . （包括子目录，但不包括空目录）
@@ -29,15 +29,15 @@ git commit -C head -a --amend 在本个节点上提交，不产出提交记录�
 ** 常用操作
 *** 撤销修改
 **** 撤销未提交的修改
-撤销1、2个文件 git checkout head readme.txt todo.txt
-撤销所有txt文件 git checkout head *.txt
+撤销 1、2 个文件 git checkout head readme.txt todo.txt
+撤销所有 txt 文件 git checkout head *.txt
 撤销所有文件 git checkout head .
 **** 撤销提交
 ***** 反转提交
 反转提交但不提交 例如：反转最后一次提交 git revert --no-commit head
 ***** 复位
 取消暂存 git reset head 或 git reset head <file name>
-复位到head之前那个版本 git reset --hard head^
+复位到 head 之前那个版本 git reset --hard head^
 *** 分支
 **** 列出本地分支 
 git branch
@@ -70,7 +70,8 @@ git branch -D new2 如果分支没有合并也会删除
 *** 解决冲突
 **** 冲突很少时 直接编辑有冲突的文件提交
 **** 冲突复杂时 git merge tool
-1.会生成.BACKUP, .BASE, .LOCAL 和.REMOTE四个文件
+1.会生成.BACKUP, .BASE, .LOCAL 和.REMOTE 四个文件
 2.然后自动调用冲突解决工具。
 3.解决之后手动删除 .orig 文件（冲突之前的文件备份）
 4.提交
+

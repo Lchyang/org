@@ -4,20 +4,21 @@
    插入代码块 <s tab 输入语言
    打开 major mode 输入代码  spc m ,
    配置文件 spc f e d
-   '' 快速切换buffer
-   spc q r重启配置
+   '' 快速切换 buffer
+   spc q r 重启配置
    spc h d v 查看 配置模块 详情
+   spc t r 显示行号
 ** file
    d ;;加上待删除标记
    u ;;取消待删除标记,其实也可取消其他标记
    x ;;删除标记的所有文件
    ~;;给所有备份文件加上待删除标记
-   D ;;大D立即删除指定文件
-   C ;;大C用于复制该文件到一个目录中
+   D ;;大 D 立即删除指定文件
+   C ;;大 C 用于复制该文件到一个目录中
    2 C;;复制该光标以及后面一个文件
    R ;;重命名文件，也可用于移动文件
    Z ;;(dired-do-compress)压缩与解压缩
-   = ;;比较改文件与另一个待会输入的文件，类同于UNIX中的diff命令
+   = ;;比较改文件与另一个待会输入的文件，类同于 UNIX 中的 diff 命令
    + ;;创建新文件夹
 ** agenda
    SPC t L     => enables line wrapping
@@ -31,7 +32,7 @@
    SPC TAB     => cycle between open buffers
    SPC m RET   => insert headline (inherit from above)
    C-c C-t     => toggle status for TODO
-   C-c [       => add this buffer to agenda list 加入后agenda to do中才会显示
+   C-c [       => add this buffer to agenda list 加入后 agenda to do 中才会显示
    C-c ]       => remove this file from agenda list
    SPC m A     => archive a TODO item
    SPC m R     => refile an archived item
@@ -61,11 +62,11 @@
 | ~RET~                | org-agenda-goto                   |
 | ~M-RET~              | org-agenda-show-and-scroll-up     |
 ** org-mode edit
-ctrl-c ctrl-e org-mode导出文件
+ctrl-c ctrl-e org-mode 导出文件
 Ctrl-c ctrl-l 描述链接地址
 *** 基于大纲标题快捷键
 M-RET 插入同级别标题
-M-S-RET 插入同级别todo标题
+M-S-RET 插入同级别 todo 标题
 M-LEFT/Right 标题升降级
 M-S-LEFT/Right 子树升降级
 M-S-UP/Down 子树升降级
@@ -74,7 +75,7 @@ C-c C-w 将子树或者区域移动到另一个标题处(跨缓冲区)
 C-c C-x b 在新缓冲区显示当前分支
 C-c / 只列出包含搜索结果的大纲，并高亮，支持多种搜索方式
 *** 文学编程
-spc-m-' 进入编辑模式 C-c C-p 启动命令行 C-c C-c运行
+spc-m-' 进入编辑模式 C-c C-p 启动命令行 C-c C-c 运行
 ** quick comment
 you can use g-c-c to comment one line and you can use v select code block use
 gc to comment these
@@ -87,6 +88,361 @@ https://github.com/syl20bnr/spacemacs/issues/9698
     put this (setq exec-path-from-shell-arguments '("-l")) in your dotspacemacs/user-init
 * vim hot keys
 ci'、ci"、ci(、ci[、ci{、ci< - 分别更改这些配对标点符号中的文本内容
-di'、di"、di(或dib、di[、di{或diB、di< - 分别删除这些配对标点符号中的文本内容
+di'、di"、di(或 dib、di[、di{或 diB、di< - 分别删除这些配对标点符号中的文本内容
 yi'、yi"、yi(、yi[、yi{、yi< - 分别复制这些配对标点符号中的文本内容
 vi'、vi"、vi(、vi[、vi{、vi< - 分别选中这些配对标点符号中的文本内容
+* spacemacs 基础
+** Spacemacs 与 Vim 的区别
+Modes 与 States 的区别，如 Vim 中的 insert mode 相当于 Spacemacs 的 evil-insert-state
+一个 buffer 中可以有多个 minor-mode 小特性，但只有一个 major-mode 主特性
+可以使用 SPC SPC 来运行 Emacs 命令，使用 SPC : 来运行 major mode 相关的命令
+, 被用做 SPC m 的快捷键，可以关闭
+s 在 visual state 中用于 surround
+快捷键规范
+通常语言相关的命令的快捷键都以 SPC m 开头，也可以使用 , 代替 
+网址
+显示方式快捷键
+快捷键	功能
+SPC t f	显示 80 字符限制线
+SPC t i	显示缩进区域线
+SPC t l	自动换行切换
+SPC t n	切换行号显示
+SPC T T	调整透明度
+Powerline
+常用开关快捷键
+快捷键	功能
+SPC t m m	切换显示 minor-mode 列表
+模式颜色
+Evil State	Color
+Normal	Orange
+Insert	Green
+Visual	Grey
+Emacs	Blue
+Motion	Purple
+Replace	Chocolate
+Lisp	Pink
+Iedit/Iedit-Insert	Red
+C-z 可以在 Vim 与 Emacs 之间切换
+
+相关显示说明
+Flycheck：显示 errors、warnings、info 
+
+
+Anzu：搜索时显示 第几个/总共多少个 
+
+
+缓冲区 Buffers
+快捷键	功能
+SPC b b	用于切换或创建 Buffer、打开最近文档
+SPC b B	打开 ibuffer
+SPC b f	在系统中打开当前文件的目录
+SPC <tab>	交替切换 buffer
+SPC b n	切换下一个 buffer
+SPC b p	切换上一个 buffer
+SPC b d	关闭当前 buffer
+SPC b C-d	关闭正则表达式匹配的 buffer
+SPC b m	关闭除当前 buffer 外的其他 buffer
+SPC b w	只读模式切换
+SPC b Y	复制整个 buffer 的内容
+SPC b .	Transien-state，用于快捷关闭 buffer
+SPC b h	跳转到 spacemacs buffer
+SPC b s	跳转到 scratch buffer
+SPC w p m	打开 Message 窗口
+Emacs 会默认创建一些 buffer，上述命令会自动忽略这些 buffer
+
+布局 Layouts
+Layouts 是多个 buffer 的窗口配置
+
+类型
+default layout：启动时默认 layout，所有的 buffer 都属于该 layout
+project layout：通过 SPC p l 切换，layout 名称为项目的目录名
+custom layout：通过 SPC l o 切换，名称以 @ 开头
+(spacemacs|define-custom-layout "@ERC"
+  :binding "E"
+  :body
+  (progn
+    ;; hook to add all ERC buffers to the layout
+    (defun spacemacs-layouts/add-erc-buffer-to-persp ()
+      (persp-add-buffer (current-buffer)
+                        (persp-get-by-name
+                         erc-spacemacs-layout-name)))
+    (add-hook 'e
+    ;; Start ERC
+    (call-interactively 'erc)))
+相关快捷键
+下边快捷键都是在使用 SPC l 进入 transient-state 后使用
+
+buffer 相关
+快捷键	功能
+a	添加一个 buffer 到当前 layout
+A	添加另一个 layout 的所有 buffer 到当前 layout
+r	从当前 layout 中删除当前 buffer
+d	删除当前 layout
+x	删除当前 layout 以及其所有 buffer
+t	暂时切换其他 buffer
+创建与切换
+快捷键	功能
+<tab>	切换到最近的 layout
+R	重命名 layout
+h	切换到 default layout
+l	切换或创建 layout
+p、n	上一个、下一个 layout
+o	打开一个 custom layout
+w	workspaces
+保存与恢复
+快捷键	功能
+s	将当前布局设置保存到文件中，默认会自动保存
+L	从文件中恢复布局
+Workspaces
+每个 layout 下可以定义多个子布局 workspace，这些 workspace 拥有同样的 buffer，使用 SPC l w 进入 transient-state 后使用
+
+快捷键	功能
+<tab>	切换到最近的 workspace
+d	关闭当前 workspace
+p、n	上一个、下一个 workspace
+R	设置标签
+w	切换 workspace
+有几个全局按键可以控制 workspace
+
+快捷键	功能
+gt	下一个 workspace
+gT	上一个 workspace
+SPC b w	根据 buffer 切换 workspace
+窗口 Windows
+快捷键	功能
+SPC <NUM>	快速切换窗口
+SPC w v//	垂直分隔窗口
+SPC w s/-	水平分隔窗口
+SPC w h/j/k/l	切换窗口
+SPC w H/J/K/L	移动窗口
+SPC w d	删除窗口
+SPC w D	利用 Ace 删除窗口
+SPC w t	锁定该窗口与 buffer
+SPC w m	最大化、最小化窗口
+SPC w .	Transien-state
+SPC w . [/]	水平调整窗口大小
+SPC w . {/}	垂直调整窗口大小
+SPC t g	根据焦点自动调整窗口大小
+文件
+快捷键	功能
+SPC f b	使用文件的书签功能
+SPC f f	在当前目录下搜索文件
+SPC f r	在最近文档中搜索文件
+SPC f c	复制当前文件到其他地方
+SPC f s	保存当前文件
+SPC f S	保存所有文件
+SPC f D	删除当前文件
+SPC f R	重命名当前文件
+SPC f y	显示当前文件的路径
+SPC f C d/u	转换编码格式为 dos 或 unix
+SPC q q	关闭 Emacs
+SPC q s	保存所有文件后关闭 Emacs
+项目管理
+项目的目录下必须存在 .git 或 .projectile 文件
+
+快捷键	功能
+SPC p '	打开 shell
+SPC p !	运行 shell 命令
+SPC p %	进入交互式替换模式
+SPC p c	通过 projectile 编译项目
+SPC p d	查找目录
+SPC p f	当前目录查找文件
+SPC p v	打开项目的 magit
+SPC p p	切换项目
+SPC /	利用 grep 搜索项目
+错误处理
+快捷键	功能
+SPC t s	开关语法检查
+SPC e n	下一个错误
+SPC e p	上一个错误
+SPC e L	列出所有错误
+SPC e e	解释光标下的错误
+帮助文档
+快捷键	功能
+SPC h d f	搜索函数
+SPC h d K	搜索快捷键表
+SPC h d v	搜索变量
+SPC h SPC	列出所有 layer 的文档
+SPC ?	列出所有快捷键
+o	打开帮助文档中的连接
+Vim 相关
+更多的文本对象
+对象	描述
+a	参数
+g	整个 buffer
+$	$ 之间的文本
+*	* 之间的文本
+%	% 之间的文本
+|	| 之间的文本
+8	/* 与 */ 之间的文本
+i	同个缩进的文本
+I	同个缩进文本以及上一行
+视角
+快捷键	功能
+SPC t -	锁定光标行在中间
+SPC n f	只显示当前函数
+SPC n r	只显示当前选择
+SPC n w	恢复显示
+⌘ =	加大字体
+⌘ -	缩小字体
+前后操作
+快捷键	功能
+[ SPC、] SPC	添加空行
+[ b、] b	跳转 buffer
+[ f、] f	目录中的文件
+[ q、] q	错误
+[ t、] t	程序间跳转
+[ w、] w	窗口跳转
+[ e、] e	交换行
+[ p、] p	行前后粘贴
+g p	选定最近粘贴的内容
+跳转
+快捷键	功能
+C-a	在行首与第一个字符间跳转
+SPC j b	取消一个跳转
+SPC j d	跳转当前目录的文件
+SPC j i	跳转到当前 buffer 的定义
+SPC j I	跳转到所有 buffer 的定义
+SPC j j	跳转到当前 buffer 的某个字母
+SPC j w	跳转到当前 buffer 的某个单词
+SPC j l	跳帧到当前 buffer 的某一行
+SPC j n	分隔当前行
+SPC s s	搜索并跳转到某一行
+SPC s g g	使用 grep 搜索当前 buffer
+SPC s b	使用 grep 进行搜索所有 buffer
+SPC s f	使用 grep 进行搜索文件
+SPC /	使用 grep 进行搜索项目
+Registers
+快捷键	功能
+SPC r m	显示 mark register
+SPC r r	显示 helm register
+SPC r y	显示 kill ring
+搜索
+快捷键	功能
+SPC s c	关闭搜索高亮
+SPC s h	搜索当前单词
+SPC s e	直接搜索替换当前选择
+*	搜索并跳转到下一个单词
+SPC s H	继续上一次的搜索
+SPC t h a	持续高亮光标下的单词
+搜索模式下的快捷键：
+
+快捷键	功能
+e	修改所有匹配，使用 V 可以只显示匹配的行，使用 <tab> 可以取消该匹配
+n/N	跳转
+d/D	跳转定义
+r	更改搜索范围（函数内、可见区域、整个 buffer）
+R	回到开始搜索的地方
+文本调整
+快捷键	功能
+SPC x a ?	自动以指定符号对齐文本
+SPC x a a	自动对齐文本
+SPC x a c	自动对齐当前的缩进区域
+SPC x j c/l/r	对齐到中间、左边、右边
+SPC x l s	排序
+SPC x l u	去重
+SPC n +/-	调整数字
+选定范围
+快捷键	功能
+SPC v	选定当前的范围
+v/V	扩大和缩小范围
+r	回到最初的范围
+HELM 模式
+在 HELM 模式下有以下的快捷键
+
+快捷键	功能
+C-h/j/k/l	移动
+C-g	退出
+C-o	下一个主题
+C-v	下一页
+C-z	操作菜单
+<tab>	执行但不退出 minibuffer
+C-q	ace jump
+C-}	简短模式
+C-t	移动 minibuffer 的位置
+当焦点出现问题时，可以使用 SPC w b 来切换到 minibuffer，使用 SPC h l 可以恢复最后一个 HELM 会话
+
+Evilified 模式
+有些只读模式提供自己的快捷键，可能会与 Vim 模式冲突，这些模式通常会使用 evilified state（棕色状态）来解决，该模式有如下规则： 
+- 保留 Vim 常见操作，如 /、:、h、j、k、l、n、N、v、V、gg、G、C-f、C-b、C-d、C-e、C-u、C-y、C-z 
+- 该模式的快捷键按照如下顺序找到第一个未使用的快捷键进行替换：a > A > C-a > C-A
+
+Transient-states
+Spacemacs 提供了一个 Transient-states（短暂状态），可以重复执行命令而不用使用 <Leader> 键，通常其快捷键为 <Leader> <group> . 
+Alt text
+
+配置文件
+主配置文件
+配置文件结构 
+- dotspacemacs/init：最先运行的代码，一般不需要修改 
+- dotspacemacs/user-config：通常用户的配置将置于此
+
+快捷键	功能
+SPC f e d	修改配置文件
+SPC f e D	将当前配置文件与最新配置文件模版进行对比
+SPC f e R	测试和重载配置文件
+layer
+种类
+layers/：用于放置官方整合的 layer
+private/：用于放置私人的 layer，会被 git 忽略
+使用 layer
+在 dotspacemacs-configuration-layers 中配置时
+
+(auto-completion :variables  ; 配置变量
+                 ...
+                 :disabled-for org git  ; 在其他层中禁止使用该层
+                 :packages (not ...)  ; 不安装该层中的某些包
+                 )
+layer 文件结构
+local/：放置本地包
+layers.el：声明 layer
+packages.el：需要安装的包以及其配置，可以使用本地包或 ELPA 包
+funcs.el：函数定义
+config.el：控制文档，如默认值和控制变量
+keybindings.el：快捷键绑定
+Emacs Lisp
+完整文档可以通过 SPC h i elisp RET 打开
+
+变量
+(setq variable value) ; Syntax
+;; Setting variables example
+(setq variable1 t ; True
+      variable2 nil ; False
+      variable3 '("A" "list" "of" "things"))
+快捷键绑定
+(define-key map new-keybinding function) ; Syntax
+;; Map H to go to the previous buffer in normal mode
+(define-key evil-normal-state-map (kbd "H") 'previous-buffer)
+;; Mapping keybinding to another keybinding
+(define-key evil-normal-state-map (kbd "H") (kbd "^")) ; H goes to beginning of the line
+设置 <Leader> 快捷键
+定义新前缀
+
+(spacemacs/declare-prefix "]" "bracket-prefix")
+定义快捷键
+
+(spacemacs/set-leader-keys key function) ; Syntax
+;; Map killing a buffer to <Leader> b c
+(spacemacs/set-leader-keys "bc" 'spacemacs/kill-this-buffer)
+;; Map opening a link to <Leader> o l only in org-mode (works for any major-mode)
+(spacemacs/set-leader-keys-for-major-mode 'org-mode
+  "ol" 'org-open-at-point)
+Spacemacs 保留了 SPC o 与 SPC m o 快捷键给用户自定义
+
+函数
+函数定义
+
+(defun func-name (arg1 arg2)
+  "docstring"
+  ;; Body
+  )
+调用函数
+
+(func-name arg1 arg1)
+插件延迟载入
+(use-package package-name
+  :defer t
+  :init  ; 插件载入之前先运行
+  ... )
+调错
+emacs --debug-init

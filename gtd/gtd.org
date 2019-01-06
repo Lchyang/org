@@ -1,0 +1,19 @@
+* task
+** TODO 数据库
+   SCHEDULED: <2019-01-06 日 13:00-15:00 +1d>
+** TODO 算法            
+   SCHEDULED: <2019-01-07 一 09:00-11:00 +1d>
+   :PROPERTIES:
+   :LAST_REPEAT: [2019-01-06 日 16:37]
+   :END:
+   - State "DONE"       from "TODO"       [2019-01-06 日 16:37]
+** TODO 计算机网络
+   SCHEDULED: <2019-01-06 日 15:00-17:00 +1d>
+** TODO linux command line
+   SCHEDULED: <2019-01-06 日 20:00-22:00 +1d>
+** WAITING python 语法
+** WAITING Django 项目
+** WAITING 其他编程语言
+*** go
+*** java
+

@@ -1,0 +1,4 @@
+* Tasks
+** TODO 
+   [2019-01-05 Sat]
+   [[file:~/org/python_base/python_advance.org::*deque][deque]]

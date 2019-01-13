@@ -1,24 +1,27 @@
 * task
-** TODO 数据库
-   SCHEDULED: <2019-01-07 Mon 13:00-15:00 +1>
+** DONE 数据库
+   CLOSED: [2019-01-08 Tue 19:56] SCHEDULED: <2019-01-07 Mon 13:00-15:00 +1>
 ** TODO 算法            
-   SCHEDULED: <2019-01-07 Mon 09:00-11:00 +1d>
+   SCHEDULED: <2019-01-08 Tue 09:00-11:00 +1d>
    :PROPERTIES:
-   :LAST_REPEAT: [2019-01-07 Mon 17:09]
+   :LAST_REPEAT: [2019-01-08 Tue 19:56]
    :END:
+   - State "DONE"       from "TODO"       [2019-01-08 Tue 19:56]
    - State "DONE"       from "TODO"       [2019-01-07 Mon 17:09]
 ** TODO 计算机网络
-   SCHEDULED: <2019-01-07 Mon 15:00-17:00 +1d>
+   SCHEDULED: <2019-01-08 Tue 15:00-17:00 +1d>
    :PROPERTIES:
-   :LAST_REPEAT: [2019-01-07 Mon 17:13]
+   :LAST_REPEAT: [2019-01-08 Tue 19:56]
    :END:
+   - State "DONE"       from "TODO"       [2019-01-08 Tue 19:56]
    - State "DONE"       from "TODO"       [2019-01-07 Mon 17:13]
    - State "DONE"       from "TODO"       [2019-01-07 Mon 17:13]
 ** TODO linux command line
-   SCHEDULED: <2019-01-07 Mon 20:00-22:00 +1d>
+   SCHEDULED: <2019-01-08 Tue 20:00-22:00 +1d>
    :PROPERTIES:
-   :LAST_REPEAT: [2019-01-07 Mon 17:10]
+   :LAST_REPEAT: [2019-01-08 Tue 19:56]
    :END:
+   - State "DONE"       from "TODO"       [2019-01-08 Tue 19:56]
    - State "DONE"       from "TODO"       [2019-01-07 Mon 17:10]
 ** WAITING python 语法
 ** WAITING Django 项目

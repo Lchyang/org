@@ -1,0 +1,73 @@
+** linux 系统
+*** ln
+ln 链接两个文件 是硬链接 在磁盘上开辟新的空间
+ln -f 如果链接已经存在 可以重置链接
+ln -s 软链接 不在磁盘开辟新的空间 而是新建一个小文件来记录链接
+
+ln 和 ln -s 区别 如果 ln 删除源文件 链接文件还可以用 ln -s 不可以
+*** mkdir
+mkdir -p a/b/c
+mkdir -v a 创建完成后返回创建是否成功信息
+*** cp
+cp a.txt b.txt
+cp a.txt b.txt foo
+cp -v a.txt b.txt
+cp -f 相当于强制 cp 当权限不允许的情况下
+cp -i 提示是否覆盖已有文件
+cp -r foo bar copy 文件夹时
+*** rm
+    rm 和 cp 用法类似
+*** Input/Output(|,>)
+'|' We can build some pretty impressive work flows by redirecting the output of
+one command to the input to another command. This is made possible by using the
+"pipe" operator, '|'.
+If we instead wated to read data from a file, we can use <.
+*** grep
+grep django requirements.txt
+grep "d..n" requirements.txt 使用正则表达式
+grep -c django requirements.txt 计算出现次数
+grep -n django requirements.txt 显示行号
+grep -i django requirements.txt 忽略大小写
+grep djanog requirements.txt django.txt 从多个文件中搜索
+gerp -r django ctyun 从文件中搜索
+grep -r --include="*.py" "django" ctyun 从 ctyun 文件夹的.py 文件中搜索 django
+grep -v "a" requirements.txt 搜索不包含 a 的所有行
+grep -v "^$" requirements | grep -v "a" 搜索包含空行的非字符 a 的行
+*** ps
+ps
+ps u
+ps -e 显示所有线程
+ps -U root /ps -U lichunyang
+ps -L
+ps -O etime,%cpu,%mem
+ps -m -O %mem -u root 根据占用内存排序
+ps -r -O %cpu -u root 根据占用 cpu 排序
+
+* linux 基础 
+** 学会使用命令帮助
+whatis command 简要说明命令的作用
+whatis -w 'l*' 正则匹配
+info command 更加详细的说明文档
+man command 查询 command 说明文档
+which command 查看文件所在路径
+whereis command 查看程序的搜索路径
+当系统中安装了同一个软件的多个版本时，不确定用的是哪个版本时，这个命令就排上了
+用场
+** 文件目录管理
+*** 创建和删除
+- 创建：mkdir
+- 删除：rm
+- 删除非空目录：rm -rf file
+- 删除日志 rm *log (等价 find ./ -name '*log' -exec rm {};)
+- 移动：mv
+- 复制：cp（复制目录：cp -r）
+查看当前目录下文件个数
+find ./ | wc -l
+*** 目录切换 
+cd
+cd ~
+cd -
+pwd
+*** 列出目录项
+    ls -lrt 按时间排序
+    ls -lh 按文件大小排序

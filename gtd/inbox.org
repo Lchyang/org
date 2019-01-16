@@ -1,13 +1,1 @@
-* Tasks
-** TODO hello world
-** TODO test
-** TODO hello world
-** TODO test
-** 体检
-   SCHEDULED: <2019-01-14 一 08:00>
-** 计算机程序的构造和解释 2-3 章
-** c 程序设计语言
-** leetcode 编程题
-** 数据库
-** 计算机网络
 

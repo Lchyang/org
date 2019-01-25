@@ -346,6 +346,12 @@ python3 中默认的 str 形式就是 unicode 形式，二进制形式用 b'abc'
   In [6]: f.close()
 #+END_SRC
 ** csv, json, xml, excel 高效解析案例进阶训练
+*** 如何读取csv数据
+*** 如何读取json数据
+    #+begin_src python
+
+    #+end_src
+
 ** DONE 类与对象深度技术案例进阶训练
    CLOSED: [2018-12-03 Mon 21:01]
 *** 如何派生内置不可变类型并修改其实例化行为？
@@ -1134,4 +1140,3 @@ f.__name__, f.__doc__, f.__moudle__...等。
    # [('g', 4), (' ', 4), ('a', 3)]
  #+END_SRC
 *** deque
-    

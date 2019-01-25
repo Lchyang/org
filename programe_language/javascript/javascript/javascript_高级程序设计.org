@@ -1,0 +1,164 @@
+* 引用类型
+** array 类型
+   #+begin_src javascript
+     var colors = ['red', 'blue', 'green'];
+     colors[3] = 'brown';
+     可以通过这种形式增加 数组的长度，python 中会报错
+
+     console.log(colors.length);  // 返回数组长度
+     colors.length = 2;  // 可以修改数组程度，Python 中不行
+
+     colors[colors.length] = 'black'; // 在数组后面添加新项，适用于不知道数组的长度的情况下
+
+     colors[99] = 'black';
+     console.log(colors.length); // 100
+   #+end_src
+*** 检测数组
+    #+begin_src javascript
+      if (Array.isArray(value)) {
+          // 对数组执行某些操作
+      }
+    #+end_src
+*** 转换数组
+    #+begin_src javascript
+      colors.toString();
+      colors.valueOf();
+      colors.toLocaleString();
+
+      var colors = ['red','blue','black']
+          > console.log(colors.join(','));
+      red,blue,black
+      undefined
+          > console.log(colors.join('||'));
+      red||blue||black
+      undefined
+          >
+    #+end_src
+如果数组中有 null, undefined, 结果以空字符表示
+*** 栈方法
+数组添加数据用 push，相当于 python 中的 append（），push()返回数组长度不是整个数组
+移除数据用 pop().
+    #+begin_src javascript
+          > var colors = Array();
+      undefined
+          > colors;
+      []
+          > var count = colors.push('red', 'green');
+      undefined
+          > console.log(count);
+      2
+      undefined
+          > count;
+      2
+          > count = colors.push('black');
+      3
+          > colors;
+      [ 'red', 'green', 'black' ]
+          > var item = colors.pop();
+      undefined
+          > item;
+      'black'
+          > colors;
+      [ 'red', 'green' ]
+          > colors.length;
+      2
+    #+end_src
+*** 队列方法
+从左边移除数据用 shift();
+    #+begin_src javascript
+          > colors;
+      [ 'red', 'green' ]
+          > colors.push('black');
+      3
+          > colors;
+      [ 'red', 'green', 'black' ]
+          > var item = colors.shift();
+      undefined
+          > item;
+      'red'
+          > colors;
+      [ 'green', 'black' ]
+          >
+    #+end_src
+从左边添加数据 unshift()
+#+begin_src javascript
+      > colors;
+  [ 'green', 'black' ]
+      > colors.unshift('red','green');
+  4
+      > colors;
+  [ 'red', 'green', 'green', 'black' ]
+#+end_src
+*** 重排序方法
+sort() 排序如果是数字排序的话需要使用比较函数
+reverse() 只是将原来的数组反转，和排序无关。
+*** 操作方法
+**** concat
+有点像 python 中的 extend 方法，但是 extend 只能接受一个列表
+concat 可以接受多个数组或单个数据。
+     #+begin_src javascript
+> var colors = ['red','green','blue'];
+undefined
+> colors;
+[ 'red', 'green', 'blue' ]
+> var colors2 = colors.concat('yellow', ['black','brown']);
+undefined
+> colors;
+[ 'red', 'green', 'blue' ]
+> colors2;
+[ 'red', 'green', 'blue', 'yellow', 'black', 'brown' ]
+>
+     #+end_src
+**** slice
+slice 类似于 python 的切片但是 slice 重新建立一个数组 python 切片是在原来列表上
+slice 可以传递一个参数，从该位置到结尾
+传递两个参数时和 python 的切片功能一致，但是没有 python 的切片强大。
+     #+begin_src javascript
+> colors2;
+[ 'red', 'green', 'blue', 'yellow', 'black', 'brown' ]
+> var colors3 = colors2.slice(1);
+undefined
+> colors3;
+[ 'green', 'blue', 'yellow', 'black', 'brown' ]
+> var colors4 = colors2.slice(1,4);
+undefined
+> colors4;
+[ 'green', 'blue', 'yellow' ]
+     #+end_src
+**** splice
+splice()可以接受几个参数，前两个参数用于控制删除元素，
+第一个参数确定起始值，第二个参数确定删除的数量。
+后面的参数用于添加数据，通过第一个参数的起始位置添加数据，如果有删除的数据
+先执行删除操作，再添加数据
+python 中没有相关的操作吧？ 能够通过切片使用没有 splice 好用
+#+begin_src javascript
+      > colors;
+  [ 'red', 'green', 'blue' ]
+      > var removed = colors.splice(0,1);
+  undefined
+      > removed;
+  [ 'red' ]
+      > colors;
+  [ 'green', 'blue' ]
+      > removed = colors.splice(1,0,'yellow','orange');
+  []
+      > var removed = colors.splice(1,0,'yellow','orange');
+  undefined
+      > removed;
+  []
+      > colors;
+  [ 'green', 'yellow', 'orange', 'yellow', 'orange', 'blue' ]
+      > reomved = colors.splice(1,1,'red','purple');
+  [ 'yellow' ]
+      > colors;
+  [ 'green', 'red', 'purple', 'orange', 'yellow', 'orange', 'blue' ]
+      > reomved;
+  [ 'yellow' ]
+      >
+#+end_src
+splice 返回一个删除数据的数组，修改操作在原数组上完成。
+*** 位置方法
+indexOf();
+lastIndexOf();
+
+

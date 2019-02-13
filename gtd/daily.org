@@ -3,18 +3,20 @@
 ** TODO 计算机网络
 *** 自定向下
 *** tcp/ip
-
 ** 数据库
 *** WAITING mysql
 *** TODO redis
 ** 操作系统
 *** mooc
 *** command liunx
-
 ** sicp 前三章
 ** 计算机系统基础（选做）
 ** python
 *** python cookbook
 *** fluent python
 *** python 标准库
+* 这一周每天做
+** LeetCode 1-2 道题
+** JavaScript 高级程序设计
+** ife2015
 

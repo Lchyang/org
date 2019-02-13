@@ -1,4 +1,59 @@
+* 基本变量
+** 严格模式 
+"use strict"
+
+也可以指示在函数中执行
+function doSomething(){
+"use strict";
+}
+** typeof 操作符
+用来检测变量类型
+"undefined"--如果这个值未定义；
+"boolean"
+"string"
+"number"
+"object"--如果这个值是 null 或是对象
+"function"
+** 转化字符串
+toString()
+string() 可以转化 null/undefined
+** 条件操作符
+variable = boolean_expression ? true_value: false_value;
+
+var max = (num1 > num2) ? num1: num2;
 * 引用类型
+** object 类型
+创建 object 类型
+var person = new Object();
+var person = {};
+
+#+begin_src javascript
+  function displayInfo(args) {
+      var output = "";
+
+      if (typeof args.name == "string"){
+          output += "Name: " + args.name + "\n";
+      }
+
+      if (typeof args.age == "number") {
+          output += "Age: " + args.age + "\n";
+      }
+
+      console.log(output);
+  }
+
+  displayInfo({
+      name : 'laj',
+      age: 22
+  });
+#+end_src
+
+person['name'];
+person.name;
+两种方法访问属性
+属性名中包含可能导致语法错误的字符，或者关键字、保留字可以使用方框
+其他形式建议使用点。
+
 ** array 类型
    #+begin_src javascript
      var colors = ['red', 'blue', 'green'];
@@ -160,5 +215,5 @@ splice 返回一个删除数据的数组，修改操作在原数组上完成。
 *** 位置方法
 indexOf();
 lastIndexOf();
-
+* 面向对象
 

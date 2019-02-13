@@ -26,5 +26,6 @@
 ** WAITING python 语法
 ** WAITING Django 项目
 ** WAITING 其他编程语言
-*** go
 *** java
+*** javascript
+
